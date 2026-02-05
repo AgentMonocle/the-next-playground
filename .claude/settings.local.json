@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bd doctor:*)",
+      "Bash(bd stats:*)",
+      "Bash(where:*)",
+      "Bash(where npm)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(cmd /c \"node --version && npm --version\")",
+      "Bash(powershell -Command:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
