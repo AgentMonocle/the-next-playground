@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import { AuthService } from './auth/authService';
 import { GraphService } from './services/graphClient';
+import { DataSeeder } from './services/seedData';
 
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null;
@@ -224,6 +225,38 @@ ipcMain.handle('outlook:createEvent', async (_event, event: { subject: string; s
   try {
     const createdEvent = await graphService.createCalendarEvent(event);
     return { success: true, data: createdEvent };
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+// IPC Handlers for Data Seeding
+ipcMain.handle('seed:seedAllData', async () => {
+  const accessToken = await authService.getAccessToken();
+  if (!accessToken) {
+    return { success: false, error: 'Not authenticated' };
+  }
+  try {
+    const seeder = new DataSeeder(accessToken);
+    const results = await seeder.seedAllData((progress) => {
+      // Send progress to renderer
+      mainWindow?.webContents.send('seed:progress', progress);
+    });
+    return { success: true, data: results };
+  } catch (error) {
+    return { success: false, error: (error as Error).message };
+  }
+});
+
+ipcMain.handle('seed:clearData', async () => {
+  const accessToken = await authService.getAccessToken();
+  if (!accessToken) {
+    return { success: false, error: 'Not authenticated' };
+  }
+  try {
+    const seeder = new DataSeeder(accessToken);
+    await seeder.clearAllCrmData();
+    return { success: true };
   } catch (error) {
     return { success: false, error: (error as Error).message };
   }

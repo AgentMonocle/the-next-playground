@@ -38,6 +38,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createEvent: (event: { subject: string; start: string; end: string; attendees?: string[] }) =>
       ipcRenderer.invoke('outlook:createEvent', event),
   },
+
+  // Data Seeding
+  seed: {
+    seedAllData: () => ipcRenderer.invoke('seed:seedAllData'),
+    clearData: () => ipcRenderer.invoke('seed:clearData'),
+    onProgress: (callback: (progress: { stage: string; current: number; total: number; message: string }) => void) => {
+      ipcRenderer.on('seed:progress', (_event, progress) => callback(progress));
+    },
+  },
 });
 
 // TypeScript declarations for the exposed API
@@ -63,6 +72,11 @@ export interface ElectronAPI {
     getEmails: (filter?: string) => Promise<{ success: boolean; data?: unknown; error?: string }>;
     sendEmail: (to: string, subject: string, body: string) => Promise<{ success: boolean; error?: string }>;
     createEvent: (event: { subject: string; start: string; end: string; attendees?: string[] }) => Promise<{ success: boolean; data?: unknown; error?: string }>;
+  };
+  seed: {
+    seedAllData: () => Promise<{ success: boolean; data?: { countries: number; companies: number; contacts: number }; error?: string }>;
+    clearData: () => Promise<{ success: boolean; error?: string }>;
+    onProgress: (callback: (progress: { stage: string; current: number; total: number; message: string }) => void) => void;
   };
 }
 
