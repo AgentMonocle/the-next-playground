@@ -10,7 +10,9 @@
       "Bash(cmd /c \"node --version && npm --version\")",
       "Bash(powershell -Command:*)",
       "Bash(npx tsc:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
