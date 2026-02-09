@@ -1,8 +1,12 @@
-# Sales CRM: Architecture Design
+# Tejas Sales System (TSS) — Architecture Design
 
-**Decisions**:
-- **Architecture**: Path 1 — React SPA + Azure Functions (TypeScript Full-Stack)
-- **Data Store**: SharePoint Lists (via Microsoft Graph API)
+**System Name**: Tejas Sales System (TSS)
+**Architecture**: Path 1 — React SPA + Azure Functions (TypeScript Full-Stack)
+**Data Store**: SharePoint Lists (via Microsoft Graph API)
+**Authentication**: Microsoft Entra ID (Microsoft 365 login)
+**SharePoint Site**: `https://tejasre.sharepoint.com/sites/sales` (existing)
+
+> **Detailed implementation**: See [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) for full schema, sales process, ID generation, staged rollout, and all configuration details.
 
 ---
 
@@ -14,6 +18,7 @@
 | **Users** | Desktop browsers + mobile phones (10-50 users) |
 | **Authentication** | Microsoft Entra ID (Office 365 credentials) |
 | **M365 Integration** | SharePoint (lists & libraries), Outlook (email), Teams (meetings, chat, files), Excel |
+| **Forms & Approvals** | JotForm Enterprise (SSO via Entra ID SAML) |
 | **Data Residency** | Stored within M365 ecosystem, consumable by Power BI |
 | **Development Tool** | Claude Code for majority of programming |
 | **Technology Constraint** | No deprecated or end-of-life components |
@@ -45,10 +50,15 @@ Azure Static Web Apps
 ├── API: Azure Functions v4 (TypeScript, isolated worker)
 │   ├── HTTP triggers (CRUD proxy to Graph API)
 │   ├── Timer triggers (email subscription renewal, digests)
-│   └── Webhook triggers (Graph change notifications)
+│   ├── Webhook triggers (Graph change notifications)
+│   └── ID generation (generate-id, generate-quote-id)
     │
     ▼  Microsoft Graph API v1.0
-SharePoint Lists (CRM data) + Outlook + Calendar + OneDrive + Teams
+SharePoint Lists (CRM data) + Document Library + Outlook + Calendar + OneDrive + Teams
+    │
+    ▲
+JotForm Enterprise ──► Power Automate ──► SharePoint Lists
+(Mobile capture, approvals)
 ```
 
 ## Technology Stack
@@ -65,6 +75,7 @@ SharePoint Lists (CRM data) + Outlook + Calendar + OneDrive + Teams
 | Backend | Azure Functions v4 (isolated) | Node 20 | Stable |
 | Server Auth | @azure/identity (Managed Identity) | latest | Stable |
 | Hosting | Azure Static Web Apps | Standard | Stable |
+| Forms | JotForm Enterprise | — | SSO via Entra ID (SAML) |
 
 ## Claude Code Compatibility: 97%
 
@@ -83,25 +94,33 @@ React SPA (MSAL Browser)
 Microsoft Graph API v1.0
     │  /sites/{siteId}/lists/{listId}/items
     ▼
-SharePoint Online Lists
-├── CRM_Countries     (reference data)
-├── CRM_Companies     (accounts)
-├── CRM_Contacts      (people)
-├── CRM_Opportunities (deals)
-├── CRM_Activities    (interactions)
-└── CRM_Documents     (file references)
+SharePoint Online Lists (https://tejasre.sharepoint.com/sites/sales)
+├── TSS_Country           (reference data — 146 countries, 7 regions)
+├── TSS_Product           (product catalog — Well Intervention, New Completions, Green Energy, Services)
+├── TSS_Company           (customer accounts — 133 seed records, parent/subsidiary hierarchy)
+├── TSS_Contact           (people at customer companies — 36 seed records)
+├── TSS_InternalTeam      (Tejas staff for team assignments)
+├── TSS_Opportunity       (sales deals — ID: OPP-[CompanyCode]-YYYY-MM-NNN)
+├── TSS_OpportunityContact      (junction: multiple contacts per opportunity)
+├── TSS_OpportunityTeam         (junction: internal team assignments per opportunity)
+├── TSS_OpportunityLineItem     (products on an opportunity)
+├── TSS_Quotation               (formal quotes — ID: QUO-[XXX]-[XXX]-V[N])
+├── TSS_OpportunityQuotation    (junction: links opportunities to quotations)
+├── TSS_Activity                (customer interactions & internal actions)
+├── TSS_ContractReview          (PO / contract reviews on won opportunities)
+├── TSS_Sequence                (ID generation counters)
+└── TSS_Opportunity_Documents   (document library — quotations, POs, technical docs)
 ```
 
-### Schema
+### Naming Conventions
 
-| List | Key Columns | Indexed Columns |
+| Item | Pattern | Example |
 |---|---|---|
-| `CRM_Countries` | Title, CountryCode, Region | Title |
-| `CRM_Companies` | Title, Industry, Revenue, Owner, Country (lookup) | Title, Owner, Industry |
-| `CRM_Contacts` | Name, Email, Phone, Company (lookup), JobTitle | Email, Company |
-| `CRM_Opportunities` | Title, Amount, Stage, Probability, CloseDate, Company (lookup) | Stage, Owner, CloseDate, Company |
-| `CRM_Activities` | Type, Description, Date, Contact (lookup), Opportunity (lookup) | Date, Type, Opportunity |
-| `CRM_Documents` | Title, Type, DocumentLink, Opportunity (lookup) | Opportunity |
+| **Lists** | `TSS_<EntityName>` (PascalCase, singular) | `TSS_Company`, `TSS_Opportunity` |
+| **Columns** | `tss_<fieldName>` (camelCase) | `tss_companyId`, `tss_stage` |
+| **Libraries** | `TSS_<Context>_Documents` | `TSS_Opportunity_Documents` |
+
+> **Full schema details**: See [DEVELOPMENT_PLAN.md, Section 2](DEVELOPMENT_PLAN.md#2-sharepoint-objects--schema) for all column definitions, types, indexes, and lookup budgets.
 
 ### Capabilities & Constraints
 
@@ -159,8 +178,8 @@ For a 10-50 user CRM, SharePoint Lists are well within limits:
 | No server-side aggregation | Pipeline totals computed client-side | React Query caching + Power BI for heavy analytics |
 | No row-level security | All users see all CRM data | Application-level access control in Azure Functions |
 | Validation not enforced via API | Bad data possible from SPA writes | All validation in TypeScript (shared schemas) |
-| 12 lookup column limit | Limits relationship complexity | Design schemas with lookup budget in mind |
-| No N:N relationships | Junction lists needed for many-to-many | Manual junction list (e.g., `CRM_OpportunityContacts`) |
+| 12 lookup column limit | Limits relationship complexity | Design schemas with lookup budget in mind (all lists within budget) |
+| No N:N relationships | Junction lists needed for many-to-many | Manual junction lists (TSS_OpportunityContact, TSS_OpportunityTeam, TSS_OpportunityQuotation) |
 | Rate limits shared across tenant | Competes with other M365 apps | React Query caching (staleTime: 5min), batch operations, delta queries |
 
 ---
@@ -176,6 +195,7 @@ For a 10-50 user CRM, SharePoint Lists are well within limits:
 | **Teams Tab** | URL iframe — no Teams SDK | MSAL `acquireTokenSilent()` for SSO |
 | **OneDrive/SharePoint Libraries** | Graph API → `/me/drive/items` | Delegated: `Files.ReadWrite` |
 | **Excel** | SharePoint list native Excel export; or Graph API workbook generation | — |
+| **JotForm Enterprise** | Power Automate bridge (JotForm → SharePoint Lists) | SSO via Entra ID (SAML) |
 
 ---
 
@@ -229,6 +249,8 @@ POST /me/sendMail
 | `renew-subscriptions` | Timer (every 48h) | Renew Graph email subscriptions (3-day expiry) |
 | `daily-digest` | Timer (daily) | Pipeline summary → Teams channel via Graph |
 | `stale-deal-alert` | Timer (weekly) | Flag opportunities with no recent activity |
+| `generate-id` | HTTP | Generate Opportunity IDs (`OPP-[CompanyCode]-YYYY-MM-NNN`) |
+| `generate-quote-id` | HTTP | Generate Quotation IDs (`QUO-[XXX]-[XXX]-V[N]`) |
 
 ---
 
@@ -250,7 +272,7 @@ POST /me/sendMail
 
 | Component | Permission Type | Scopes |
 |---|---|---|
-| React SPA (user context) | Delegated | `Sites.ReadWrite.All`, `Mail.Read`, `Mail.Send`, `Calendars.ReadWrite`, `User.Read` |
+| React SPA (user context) | Delegated | `Sites.ReadWrite.All`, `Mail.Read`, `Mail.Send`, `Calendars.ReadWrite`, `User.Read`, `Files.ReadWrite` |
 | Azure Functions (background) | Application (Managed Identity) | `Sites.ReadWrite.All`, `Mail.Read`, `ChannelMessage.Send` |
 
 ### XSS Mitigation
@@ -280,7 +302,8 @@ All authenticated users with `Sites.ReadWrite.All` can access all CRM data via G
 | Azure Storage | $2-5 |
 | Azure Key Vault | $1 |
 | Data storage licensing | $0 (SharePoint Lists included with M365) |
-| **Total** | **$5-30** |
+| JotForm Enterprise | Custom pricing (contact JotForm) |
+| **Total (excl. JotForm)** | **$5-30** |
 
 ---
 

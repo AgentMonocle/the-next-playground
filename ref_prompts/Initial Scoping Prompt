@@ -1,0 +1,61 @@
+Use beads to create a development plan please incorporate these additional details
+
+# The development plan should:
+1) Define the system name as Tejas Sales System and use the abbreviation of TSS.
+2) Log users into the system via Microsoft Azure framework (thier Microsoft 365 login) for interacting with the system and the ecosystem it integrate with.
+3) Consider functionality based on Microsoft 365 + JotForm Enterprise
+
+# I would like the development plan to include
+1) documentation for the naming standards for objects (primarily lists) that will be loaded into the Sharepoint
+2) documentation for the objects (primarily lists) that will be loaded into the Sharepoint
+3) documentation for the schema/relationship of the objects loaded into the Sharepoint.
+4) cover strategies for tracting activities, such as customer interactions, while minimizing the need to manual data entry.
+5) a dedicated section for the setup and configuration of dependencies like MS Graph Permissions, Azure setup, etc. with clear references for why each dependencies is needed (what functions they support0
+6) a strategy for staged development and deployment of features, we want to start with a basic proof of concept functionality and add features from there (after we have a working beta).
+7) a strategy for debugging, monitoring, alerting if we need it.
+
+# The sales process (opportunity states) are broken into phases:
+1) Lead - Initial inquiry or identified prospect, during this phase we want to:
+	1) Identify Customer Company
+	2) Identify Customer Reprentatives
+		1) plus tag primary decision makeres
+		2) plus additional company influencers)
+	3) Identify Primary Sales Team (internal group)
+	4) Identify Support Team (internal group)
+	5) Define the scope of opportunity
+		1) Potential revenue
+		2) Is it related to other opportunities?
+2) "Qualification" - Does the opportunity align with company goals? During this phase we want to:
+	1) Capture project technical information
+	2) Capture product specific technical information & requirements
+	3) Identify bid due date
+	4) Identify requested items & due dates for delivery
+	5) Identify the final delivery date.
+	5) Review if we are going to pursue this opportunity or not.
+		1) and capture our relationale on our decision.
+3) "Quotation" - Details collected, reviewed, approved, and sent to client.
+	1) Pull products from product book / configure
+	2) Pull standard Terms and Conditions that are applicable
+	3) Prepare a quotation
+	4) Hold quote review & capture approvals
+	5) When quotation has been sent out to clietn.
+4) "Negotiation" - Commerical terms being finalized.
+	1) Capture updates to quote
+	2) Review, Revise, and Approvals
+	3) Track versions and track sending quotation to client.
+5) "Close" - End of an opportunity
+	1) Mark if won / cancelled / Lost	
+	2) Give reason for close	
+	3) If won, Receive and store PO	
+		1)	Identify & catalog terms & conditions
+		2) 	Terms compared against quotes as sent
+		3) Send to customer for revised PO if required
+		4) Hold contract review & capture approvals
+		5) Capture Sales Tax / Tax exempt export attestation from customer
+6) "After Action" - Post a project, we need to follow up with our clients.
+	1) Capture customer interactions up until project delivery / execution
+	2) Follow-up with customer after shipping to get copies of shipping manifests
+
+# Some features we will probably need
+1) Sharepoint Library for collecting documentation tied to opportunities.
+2) Unique IDs for every opportunity and quotation we send out.

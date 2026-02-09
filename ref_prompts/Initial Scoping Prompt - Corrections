@@ -1,0 +1,10 @@
+Using beads let's make modifications to the development plan.
+1) The Sharepoint Site will be the existing sales organization site (https://tejasre.sharepoint.com/sites/sales"
+2) Please review the data files in ref_datasets which are exports of lists (csv with schema) that I developed earlier that I would like to incorporate (the information, not that actual lists) into the development plan. Provide a report on how you will incorporate this information.
+	1) Client Records.csv
+	2) Company Records.csv
+	3) Countries.csv
+		1) Companies have relationships to other companies.  One Example is China National Petroleum Corporation (CNPC) is the parent company of China National Petroleum Corporate - USA (CNPCUS).  Understanding this hierarchy allows us to see all opportunities for a company and all its subsidiary entities.
+3) Using TSS again inside the TSS_Opportunity_Documents please research 7 different ID Generation Strategies and let me review them to select one.
+	1) Oportunity IDs are an internal facing ID and should be easily decoded to differentiate easily for internal personal.
+	2) Quotation IDs will be both internal and external facing so that should be easily decodable to the client as to provide insights (like how many IDs we generate in a year).
