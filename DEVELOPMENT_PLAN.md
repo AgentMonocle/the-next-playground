@@ -251,7 +251,8 @@ The application implements a recursive `getCompanyTree(companyId)` function that
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
 | Quote Title | `Title` | Single line text | Yes | Yes | Descriptive name |
-| Quote ID | `tss_quoteId` | Single line text | Yes | Yes | Auto-generated: Hash-based (see [Section 8](#8-id-generation-strategy) for format options) |
+| Quote ID | `tss_quoteId` | Single line text | Yes | Yes | Full ID with version: `QUO-[XXX]-[XXX]-V[N]` (e.g., `QUO-A3F-79C-V1`). See [Section 8](#8-id-generation-strategy) |
+| Quote ID Core | `tss_quoteIdCore` | Single line text | Yes | Yes | Hash portion without version: `QUO-[XXX]-[XXX]` (e.g., `QUO-A3F-79C`). Same across all revisions of a quote |
 | Opportunity | `tss_opportunityId` | Lookup → TSS_Opportunity | Yes | Yes | Parent opportunity |
 | Version | `tss_version` | Number | Yes | No | 1, 2, 3... increments with revisions |
 | Status | `tss_status` | Choice | Yes | Yes | Draft, In Review, Approved, Sent, Revised, Superseded |
@@ -273,7 +274,7 @@ This list explicitly ties Opportunity IDs to Quotation IDs, enabling:
 
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
-| Title | `Title` | Single line text | Yes | Yes | Auto-set: `[OpportunityId] ↔ [QuoteId]` (e.g., "OPP-CVX-2026-03-001 ↔ Q-7K2M9X4P") |
+| Title | `Title` | Single line text | Yes | Yes | Auto-set: `[OpportunityId] ↔ [QuoteId]` (e.g., "OPP-CVX-2026-03-001 ↔ QUO-A3F-79C-V1") |
 | Opportunity | `tss_opportunityId` | Lookup → TSS_Opportunity | Yes | Yes | Parent opportunity |
 | Quotation | `tss_quotationId` | Lookup → TSS_Quotation | Yes | Yes | Linked quotation |
 | Is Active Version | `tss_isActiveVersion` | Yes/No | No | No | True for the current/latest version; False for superseded versions |
@@ -283,10 +284,11 @@ This list explicitly ties Opportunity IDs to Quotation IDs, enabling:
 **Lookup budget**: 2 of 12 used (tss_opportunityId, tss_quotationId)
 
 **Use cases**:
-- View all quotation versions for `OPP-CVX-2026-03-001` with their statuses
+- View all quotation versions for `OPP-CVX-2026-03-001` with their statuses (QUO-A3F-79C-V1, V2, V3...)
 - Identify which quote version won the deal
 - Dashboard: count of quotes per opportunity (revision depth)
 - Cross-opportunity analysis: "What quotes are outstanding across all Chevron opportunities?"
+- Group revisions by `tss_quoteIdCore` — all versions of QUO-A3F-79C share the same core
 
 ### TSS_Activity (Customer Interactions & Internal Actions)
 
@@ -501,7 +503,8 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 
 **System Actions**:
 - Create TSS_Quotation record linked to opportunity
-  - System generates unique Quote ID (hash-based, see [Section 8](#8-id-generation-strategy))
+  - System generates Quote ID Core (`QUO-A3F-79C`) + full ID (`QUO-A3F-79C-V1`)
+  - Store both `tss_quoteIdCore` and `tss_quoteId` on the quotation record
   - Create TSS_OpportunityQuotation junction record linking opportunity ↔ quotation
   - Set `tss_isActiveVersion` = Yes on junction record
   - Version = 1
@@ -527,11 +530,13 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 - Capture customer feedback/requested changes as Activities
 - **Revise Quote**:
   - Create new TSS_Quotation with same Opportunity, Version = N+1
+  - Inherit same `tss_quoteIdCore` (e.g., `QUO-A3F-79C`), new `tss_quoteId` = `QUO-A3F-79C-V[N+1]`
   - Create new TSS_OpportunityQuotation junction record; set `tss_isActiveVersion` = Yes
   - Set previous junction record's `tss_isActiveVersion` = No
   - Previous quotation Status → "Superseded"
   - New version goes through Draft → In Review → Approved → Sent cycle
 - Track all versions — full history maintained in TSS_Quotation + TSS_OpportunityQuotation lists
+- All versions grouped by `tss_quoteIdCore` for easy revision history lookup
 - Each send creates an Activity (Type: "Quote Sent", notes include version number)
 
 ### Phase 5: Close
@@ -669,9 +674,9 @@ JotForm does **not** have native ability to dynamically populate dropdowns from 
 TSS_Opportunity_Documents/
 ├── OPP-CVX-2026-03-001/
 │   ├── Quotations/
-│   │   ├── Q-7K2M9X4P-v1.pdf
-│   │   ├── Q-7K2M9X4P-v2.pdf
-│   │   └── Q-7K2M9X4P-v3.pdf
+│   │   ├── QUO-A3F-79C-V1.pdf
+│   │   ├── QUO-A3F-79C-V2.pdf
+│   │   └── QUO-A3F-79C-V3.pdf
 │   ├── Purchase Orders/
 │   │   └── PO-12345.pdf
 │   ├── Technical/
@@ -685,7 +690,7 @@ TSS_Opportunity_Documents/
 │   └── ...
 ```
 
-> **Note**: The quotation filenames above use Option A (`Q-7K2M9X4P`) as an example. Actual format depends on the selected hash option (see [Section 8](#8-id-generation-strategy)).
+> **Note**: Quotation PDF filenames use the full Quote ID including version (e.g., `QUO-A3F-79C-V1.pdf`). All versions of a quote are stored in the same opportunity folder.
 
 ### Document Library Metadata Columns
 
@@ -731,88 +736,42 @@ TSS_Opportunity_Documents/
 - **No volume leakage** — counters are per-company-per-month, so competitors can't infer total deal count
 - **Collision-free** — company code + year + month + sequence is unique
 
-### Quotation IDs (External-Facing — Hash-Based)
+### Quotation IDs (External-Facing — Hash-Based with Version Suffix)
 
-Quotation IDs appear on documents sent to customers. A sequential format (QUO-0001, QUO-0002) reveals business volume to clients. Hash-based IDs provide opaque, professional identifiers.
+Quotation IDs appear on documents sent to customers. A sequential format (QUO-0001, QUO-0002) reveals business volume to clients. The selected approach uses a 6-character hex hash (segmented) with an explicit version suffix.
 
-**⚠️ Decision Required**: Choose one of the following 4 options:
+**Format**: `QUO-[XXX]-[XXX]-V[N]`
 
-#### Option A: Short Alphanumeric Hash
+| Segment | Description | Example |
+|---|---|---|
+| `QUO` | Entity type prefix | `QUO` |
+| `[XXX]-[XXX]` | 6-character hex hash in two 3-char segments | `A3F-79C` |
+| `-V[N]` | Version number suffix | `-V1`, `-V2`, `-V3` |
 
-**Format**: `Q-[8 chars]`
+The **Quote ID Core** (`QUO-[XXX]-[XXX]`) remains the same across all revisions. Only the version suffix changes.
 
-Generated from: `SHA-256(opportunityId + version + timestamp)`, take first 8 characters (base36: 0-9, A-Z).
+**Examples**:
 
-| Example | Notes |
-|---|---|
-| `Q-7K2M9X4P` | 8 chars = 2.8 trillion combinations (base36^8) |
-| `Q-B3N5R8W1` | Short enough for verbal reference ("Quote Q-B3N5R8W1") |
-| `Q-F9D2L6T4` | No dashes within hash portion — clean appearance |
+| Quote ID | Core | Version | Meaning |
+|---|---|---|---|
+| `QUO-A3F-79C-V1` | `QUO-A3F-79C` | 1 | First version of this quote |
+| `QUO-A3F-79C-V2` | `QUO-A3F-79C` | 2 | Revised — supersedes V1 |
+| `QUO-A3F-79C-V3` | `QUO-A3F-79C` | 3 | Second revision — supersedes V2 |
+| `QUO-7B1-D4E-V1` | `QUO-7B1-D4E` | 1 | Different quote (different opportunity or same opp, different quote lineage) |
 
-**Pros**: Very short, easy to reference verbally, fits well on documents.
-**Cons**: Smallest collision space of the 4 options (still astronomically unlikely at CRM scale).
-**Collision probability**: < 1 in 1 billion at 10,000 quotes.
+**How the hash is generated**:
+- Input: `SHA-256(opportunityId + creation timestamp)`
+- Take first 6 hex characters (0-9, A-F uppercase)
+- Format as two 3-character segments: `[XXX]-[XXX]`
+- The hash is generated **once** when the first version is created; all subsequent versions inherit the same core
 
-#### Option B: UUID-Style Segmented Hash
-
-**Format**: `QUO-[XXXX]-[XXXX]`
-
-Generated from: `SHA-256(opportunityId + version + timestamp)`, formatted as two 4-character hex segments.
-
-| Example | Notes |
-|---|---|
-| `QUO-A3F7-9C2E` | Looks like a professional reference number |
-| `QUO-7B1D-4E8A` | Segments make it easier to read/dictate |
-| `QUO-D5F2-1A9C` | 8 hex chars = 4.3 billion combinations |
-
-**Pros**: Professional appearance, segmented for readability, familiar format.
-**Cons**: Slightly longer than Option A; hex characters only (0-9, A-F) vs full alphanumeric.
-**Collision probability**: < 1 in 100 million at 10,000 quotes.
-
-#### Option C: Year-Prefixed Hash
-
-**Format**: `Q-YYYY-[XXXXXX]`
-
-Generated from: `SHA-256(opportunityId + version + timestamp)`, take 6 alphanumeric characters, prefixed with creation year.
-
-| Example | Notes |
-|---|---|
-| `Q-2026-K7M3P9` | Year provides temporal context without revealing volume |
-| `Q-2026-B2N8W5` | Customer knows roughly when quote was generated |
-| `Q-2027-R4D6F1` | 6 chars = 2.2 billion combinations (base36^6) per year |
-
-**Pros**: Year gives useful context (for filing, aging), hash prevents volume inference, resets collision space annually.
-**Cons**: Longer format; year is somewhat redundant if the quote document is dated.
-**Collision probability**: < 1 in 100 million at 10,000 quotes/year.
-
-#### Option D: Checksum-Verified Hash
-
-**Format**: `Q-[6 chars]-[2 char check]`
-
-Generated from: `SHA-256(opportunityId + version + timestamp)`, take first 6 characters (base36), append 2-character Luhn-mod-36 checksum.
-
-| Example | Notes |
-|---|---|
-| `Q-7K2M9X-P4` | 6 hash + 2 check = data entry error detection |
-| `Q-B3N5R8-W1` | If customer misquotes one character, system detects it |
-| `Q-F9D2L6-T4` | Checksum validated on lookup — "Did you mean Q-F9D2L6-T4?" |
-
-**Pros**: Built-in error detection for manual entry (phone/email), professional appearance, catches typos.
-**Cons**: More complex generation logic; 2 extra characters; customers may not understand the dash-separated check digits.
-**Collision probability**: < 1 in 100 million at 10,000 quotes (6-char hash space).
-
-#### Quotation ID Comparison
-
-| Aspect | Option A | Option B | Option C | Option D |
-|---|---|---|---|---|
-| **Format** | `Q-7K2M9X4P` | `QUO-A3F7-9C2E` | `Q-2026-K7M3P9` | `Q-7K2M9X-P4` |
-| **Length** | 10 chars | 13 chars | 13 chars | 12 chars |
-| **Character set** | Base36 (0-9,A-Z) | Hex (0-9,A-F) | Base36 (0-9,A-Z) | Base36 (0-9,A-Z) |
-| **Temporal context** | None | None | Year visible | None |
-| **Error detection** | None | None | None | Luhn checksum |
-| **Verbal readability** | Good | Good (segmented) | Good | Good (segmented) |
-| **Volume privacy** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
-| **Complexity** | Low | Low | Low | Medium |
+**Why This Format**:
+- **Volume privacy** — hash reveals nothing about how many quotes exist
+- **Professional appearance** — segmented format reads like a reference number
+- **Version clarity** — customer and internal team immediately know which revision they're looking at
+- **Verbal readability** — "Quote QUO-A3F-79C version 2" is easy to say on a call
+- **Grouping** — all versions of a quote share the same core, making it trivial to find revision history
+- **Collision space** — 6 hex chars = 16.7 million combinations; collision probability < 1 in 1 million at 10,000 quotes
 
 ### How IDs are Generated
 
@@ -828,7 +787,7 @@ SharePoint Lists don't have auto-increment custom columns. Strategy:
 **Scope key examples**:
 - `OPP-CVX-2026-03` → counter for Chevron opportunities in March 2026
 - `OPP-SLB-2026-03` → counter for Schlumberger opportunities in March 2026
-- `QUO` → single global counter for quotation hash seed (if needed for uniqueness)
+- Quotation IDs do not use TSS_Sequence — they are hash-generated (see `generate-quote-id` above)
 
 2. **Azure Function** (`generate-id`) handles Opportunity ID generation:
    - Receive company code + entity type
@@ -839,12 +798,15 @@ SharePoint Lists don't have auto-increment custom columns. Strategy:
    - Return formatted ID: `OPP-[companyCode]-YYYY-MM-[counter padded to 3]`
 
 3. **Azure Function** (`generate-quote-id`) handles Quotation ID generation:
-   - Receive opportunity ID + version number
-   - Compute `SHA-256(opportunityId + version + Date.now())`
-   - Format per selected option (A, B, C, or D)
-   - Verify uniqueness against TSS_Quotation (query for existing `tss_quoteId`)
-   - If collision (astronomically unlikely), re-hash with additional entropy
-   - Return formatted quote ID
+   - **New quote (V1)**: Receive opportunity ID
+     - Compute `SHA-256(opportunityId + Date.now())`
+     - Take first 6 hex characters, format as `QUO-[XXX]-[XXX]`
+     - Verify core uniqueness against TSS_Quotation `tss_quoteIdCore` column
+     - If collision (< 1 in 1M chance), re-hash with additional entropy
+     - Return `QUO-[XXX]-[XXX]-V1` as full ID, `QUO-[XXX]-[XXX]` as core
+   - **Revised quote (V2+)**: Receive existing quote ID core + new version number
+     - Core stays the same — just append `-V[N]`
+     - Return `QUO-[XXX]-[XXX]-V[N]` as full ID
 
 4. **Concurrency**: ETag-based optimistic locking ensures no two concurrent requests get the same sequence number. If ETag conflict, retry (up to 3 attempts).
 
