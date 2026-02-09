@@ -29,8 +29,8 @@
 
 | Item | Value |
 |---|---|
-| **Site Name** | Tejas Sales System |
-| **Site URL** | `/sites/TSS` |
+| **Site Name** | Sales (existing site) |
+| **Site URL** | `https://tejasre.sharepoint.com/sites/sales` |
 
 ### SharePoint List Naming Convention
 
@@ -88,7 +88,7 @@ These SharePoint columns exist on every list and should be used as-is:
 |---|---|---|---|---|---|
 | Country Name | `Title` | Single line text | Yes | Yes | Built-in column |
 | Country Code | `tss_countryCode` | Single line text | Yes | Yes | ISO 3166-1 alpha-2 (US, CA, MX, etc.) |
-| Region | `tss_region` | Choice | Yes | Yes | North America, Latin America, Europe, Middle East, Asia Pacific, Africa |
+| Region | `tss_region` | Choice | Yes | Yes | North America, South America, Europe, Middle East, Asia, Africa, Oceania |
 
 ### TSS_Product (Product Catalog)
 
@@ -108,8 +108,11 @@ These SharePoint columns exist on every list and should be used as-is:
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
 | Company Name | `Title` | Single line text | Yes | Yes | Built-in column |
+| Company Code | `tss_companyCode` | Single line text (2-6 chars) | Yes | Yes | Unique business abbreviation (e.g., SLB, CVX, CNPC, TRE) |
 | Industry | `tss_industry` | Choice | No | Yes | Oil & Gas E&P, Oil & Gas Services, CCS/CCUS, Geothermal, Engineering, Government/Research, Other |
 | Country | `tss_countryId` | Lookup → TSS_Country | No | No | Primary country of operations |
+| Is Subsidiary | `tss_isSubsidiary` | Yes/No | No | No | True if this company has a parent company |
+| Parent Company | `tss_parentCompanyId` | Lookup → TSS_Company | No | Yes | Self-referential: parent in corporate hierarchy (e.g., CNPC → CNPCUS) |
 | Website | `tss_website` | Hyperlink | No | No | Company URL |
 | Phone | `tss_phone` | Single line text | No | No | Main phone number |
 | Address | `tss_address` | Multiple lines | No | No | Street, City, State/Province, ZIP |
@@ -119,13 +122,47 @@ These SharePoint columns exist on every list and should be used as-is:
 | Notes | `tss_notes` | Multiple lines | No | No | General account notes |
 | Is Active | `tss_isActive` | Yes/No | Yes | No | Soft delete flag |
 
-**Lookup budget**: 1 of 12 used (tss_countryId)
+**Lookup budget**: 2 of 12 used (tss_countryId, tss_parentCompanyId)
+
+### Company Hierarchy (Parent/Subsidiary Chain)
+
+The `tss_parentCompanyId` self-referential lookup supports multi-level corporate hierarchies. While most relationships are single-level (parent → subsidiary), the system can follow chains of any depth:
+
+```
+TotalEnergies SE (TTE)
+├── TotalEnergies EP Danmark (TEPDK)
+└── TotalEnergies EP Malaysia (TEPMY)
+
+Schlumberger (SLB)
+├── Cameron (CAM)
+├── Geoservices Equipments (GEOSE)
+└── OneSubsea (OSB)
+```
+
+**Hierarchy Traversal** (application-level, in TypeScript):
+
+To find all companies in a hierarchy (e.g., "all entities under Schlumberger"):
+1. Start with root company (Schlumberger, ID = X)
+2. Query TSS_Company where `tss_parentCompanyId` = X → get children (Cameron, Geoservices, OneSubsea)
+3. For each child, recursively query for their children → get grandchildren (if any)
+4. Collect all IDs in the tree
+5. Query TSS_Opportunity where `tss_companyId` IN [all collected IDs]
+
+The application implements a recursive `getCompanyTree(companyId)` function that walks the hierarchy. Results are cached in React Query since corporate structures change infrequently.
+
+**Example queries enabled by hierarchy**:
+- "Show all opportunities for Schlumberger and its subsidiaries"
+- "Total revenue across the TotalEnergies family"
+- "Find the ultimate parent company for TotalEnergies EP Danmark"
+
+**Seed data**: 133 companies from reference data, including 21 parent/subsidiary relationships.
 
 ### TSS_Contact (People at Customer Companies)
 
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
 | Full Name | `Title` | Single line text | Yes | Yes | "First Last" format |
+| Preferred Name | `tss_preferredName` | Single line text | No | No | Informal name the contact goes by (e.g., "Bubba", "Jim Yue", "Bryan Nguyen, P.E.") |
 | Email | `tss_email` | Single line text | No | Yes | Primary email address |
 | Phone | `tss_phone` | Single line text | No | No | Direct phone |
 | Mobile | `tss_mobile` | Single line text | No | No | Mobile phone |
@@ -153,7 +190,7 @@ These SharePoint columns exist on every list and should be used as-is:
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
 | Opportunity Name | `Title` | Single line text | Yes | Yes | Descriptive name |
-| Opportunity ID | `tss_opportunityId` | Single line text | Yes | Yes | Auto-generated: `TSS-OPP-YYYY-NNNN` |
+| Opportunity ID | `tss_opportunityId` | Single line text | Yes | Yes | Auto-generated: `OPP-[CompanyCode]-YYYY-MM-NNN` (e.g., `OPP-CVX-2026-03-001`) |
 | Company | `tss_companyId` | Lookup → TSS_Company | Yes | Yes | Customer account |
 | Primary Contact | `tss_primaryContactId` | Lookup → TSS_Contact | No | No | Main point of contact |
 | Stage | `tss_stage` | Choice | Yes | Yes | Lead, Qualification, Quotation, Negotiation, Close, After Action |
@@ -214,7 +251,7 @@ These SharePoint columns exist on every list and should be used as-is:
 | Column | Internal Name | Type | Required | Indexed | Notes |
 |---|---|---|---|---|---|
 | Quote Title | `Title` | Single line text | Yes | Yes | Descriptive name |
-| Quote ID | `tss_quoteId` | Single line text | Yes | Yes | Auto-generated: `TSS-QUO-YYYY-NNNN` |
+| Quote ID | `tss_quoteId` | Single line text | Yes | Yes | Auto-generated: Hash-based (see [Section 8](#8-id-generation-strategy) for format options) |
 | Opportunity | `tss_opportunityId` | Lookup → TSS_Opportunity | Yes | Yes | Parent opportunity |
 | Version | `tss_version` | Number | Yes | No | 1, 2, 3... increments with revisions |
 | Status | `tss_status` | Choice | Yes | Yes | Draft, In Review, Approved, Sent, Revised, Superseded |
@@ -226,6 +263,30 @@ These SharePoint columns exist on every list and should be used as-is:
 | Terms | `tss_terms` | Multiple lines | No | No | Standard T&Cs selected / customized |
 | Document Link | `tss_documentLink` | Hyperlink | No | No | Link to quote PDF in document library |
 | Notes | `tss_notes` | Multiple lines | No | No | Quote-specific notes |
+
+### TSS_OpportunityQuotation (Junction: Links Opportunities to Quotations)
+
+This list explicitly ties Opportunity IDs to Quotation IDs, enabling:
+- Tracking all quotes generated for an opportunity across revisions
+- Cross-referencing which quotation was the "winning" version
+- Querying all quotations by opportunity without relying solely on the lookup on TSS_Quotation
+
+| Column | Internal Name | Type | Required | Indexed | Notes |
+|---|---|---|---|---|---|
+| Title | `Title` | Single line text | Yes | Yes | Auto-set: `[OpportunityId] ↔ [QuoteId]` (e.g., "OPP-CVX-2026-03-001 ↔ Q-7K2M9X4P") |
+| Opportunity | `tss_opportunityId` | Lookup → TSS_Opportunity | Yes | Yes | Parent opportunity |
+| Quotation | `tss_quotationId` | Lookup → TSS_Quotation | Yes | Yes | Linked quotation |
+| Is Active Version | `tss_isActiveVersion` | Yes/No | No | No | True for the current/latest version; False for superseded versions |
+| Is Winning Quote | `tss_isWinningQuote` | Yes/No | No | No | True for the quotation that led to a Won close |
+| Notes | `tss_notes` | Multiple lines | No | No | Context for the linkage |
+
+**Lookup budget**: 2 of 12 used (tss_opportunityId, tss_quotationId)
+
+**Use cases**:
+- View all quotation versions for `OPP-CVX-2026-03-001` with their statuses
+- Identify which quote version won the deal
+- Dashboard: count of quotes per opportunity (revision depth)
+- Cross-opportunity analysis: "What quotes are outstanding across all Chevron opportunities?"
 
 ### TSS_Activity (Customer Interactions & Internal Actions)
 
@@ -277,8 +338,9 @@ TSS_Country
     │ (1:N)
     ▼
 TSS_Company ◄──────────────────────────────┐
-    │                                       │
-    │ (1:N)                                 │ (lookup)
+    │  ▲                                    │
+    │  └── (self-ref: parent/subsidiary)    │ (lookup)
+    │ (1:N)                                 │
     ▼                                       │
 TSS_Contact ◄──── TSS_OpportunityContact ───┤
     │              (N:N junction)           │
@@ -291,6 +353,8 @@ TSS_Opportunity ─── TSS_OpportunityTeam ──► TSS_InternalTeam
     ├── (1:N) TSS_OpportunityLineItem ──► TSS_Product
     │
     ├── (1:N) TSS_Quotation
+    │          │
+    │          └── TSS_OpportunityQuotation (N:N junction: Opportunity ↔ Quotation)
     │
     ├── (1:N) TSS_Activity
     │
@@ -309,6 +373,7 @@ TSS_Activity also links to:
 | Parent | Child | Type | Junction List | Cascade Delete |
 |---|---|---|---|---|
 | TSS_Country | TSS_Company | 1:N | — | No (restrict) |
+| TSS_Company | TSS_Company | Self-ref | — | No (parent/subsidiary hierarchy) |
 | TSS_Company | TSS_Contact | 1:N | — | No (restrict) |
 | TSS_Company | TSS_Opportunity | 1:N | — | No (restrict) |
 | TSS_Company | TSS_Activity | 1:N | — | No (restrict) |
@@ -319,9 +384,11 @@ TSS_Activity also links to:
 | TSS_Opportunity | TSS_OpportunityLineItem | 1:N | — | Yes |
 | TSS_Product | TSS_OpportunityLineItem | 1:N | — | No (restrict) |
 | TSS_Opportunity | TSS_Quotation | 1:N | — | No (restrict) |
+| TSS_Opportunity | TSS_OpportunityQuotation | 1:N | Yes (junction) | Yes |
+| TSS_Quotation | TSS_OpportunityQuotation | 1:N | Yes (junction) | Yes |
 | TSS_Opportunity | TSS_Activity | 1:N | — | No (restrict) |
 | TSS_Opportunity | TSS_ContractReview | 1:N | — | No (restrict) |
-| TSS_Opportunity | TSS_Opportunity | Self-ref | — | No |
+| TSS_Opportunity | TSS_Opportunity | Self-ref | — | No (related opportunities) |
 | TSS_Contact | TSS_Activity | 1:N | — | No (restrict) |
 
 ### Lookup Budget Summary
@@ -330,7 +397,7 @@ TSS_Activity also links to:
 |---|---|---|
 | TSS_Country | 0 | 12 |
 | TSS_Product | 0 | 12 |
-| TSS_Company | 1 (Country) | 11 |
+| TSS_Company | 2 (Country, ParentCompany) | 10 |
 | TSS_Contact | 1 (Company) | 11 |
 | TSS_InternalTeam | 0 | 12 |
 | TSS_Opportunity | 4 (Company, PrimaryContact, RelatedOpp + cascading) | 8 |
@@ -338,10 +405,11 @@ TSS_Activity also links to:
 | TSS_OpportunityTeam | 2 (Opportunity, TeamMember) | 10 |
 | TSS_OpportunityLineItem | 2 (Opportunity, Product) | 10 |
 | TSS_Quotation | 1 (Opportunity) | 11 |
+| TSS_OpportunityQuotation | 2 (Opportunity, Quotation) | 10 |
 | TSS_Activity | 3 (Company, Contact, Opportunity) | 9 |
 | TSS_ContractReview | 1 (Opportunity) | 11 |
 
-All lists are well within the 12-lookup limit.
+All lists are well within the 12-lookup limit. Total lists: 13 (12 data lists + TSS_Sequence).
 
 ---
 
@@ -398,7 +466,7 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 
 **System Actions**:
 - Create TSS_Opportunity with Stage = "Lead"
-- System generates unique Opportunity ID: `TSS-OPP-YYYY-NNNN`
+- System generates unique Opportunity ID: `OPP-[CompanyCode]-YYYY-MM-NNN` (e.g., `OPP-CVX-2026-03-001`)
 - Create or link TSS_Company record
 - Create or link TSS_Contact records via TSS_OpportunityContact
   - Tag Decision Makers (`tss_contactRole` = "Decision Maker")
@@ -433,7 +501,9 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 
 **System Actions**:
 - Create TSS_Quotation record linked to opportunity
-  - System generates unique Quote ID: `TSS-QUO-YYYY-NNNN`
+  - System generates unique Quote ID (hash-based, see [Section 8](#8-id-generation-strategy))
+  - Create TSS_OpportunityQuotation junction record linking opportunity ↔ quotation
+  - Set `tss_isActiveVersion` = Yes on junction record
   - Version = 1
   - Status = "Draft"
 - Pull products from TSS_OpportunityLineItem into quotation
@@ -457,9 +527,11 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 - Capture customer feedback/requested changes as Activities
 - **Revise Quote**:
   - Create new TSS_Quotation with same Opportunity, Version = N+1
-  - Previous version Status → "Superseded"
+  - Create new TSS_OpportunityQuotation junction record; set `tss_isActiveVersion` = Yes
+  - Set previous junction record's `tss_isActiveVersion` = No
+  - Previous quotation Status → "Superseded"
   - New version goes through Draft → In Review → Approved → Sent cycle
-- Track all versions — full history maintained in TSS_Quotation list
+- Track all versions — full history maintained in TSS_Quotation + TSS_OpportunityQuotation lists
 - Each send creates an Activity (Type: "Quote Sent", notes include version number)
 
 ### Phase 5: Close
@@ -474,6 +546,7 @@ Every activity records its `tss_source` (Manual, Email Auto-Link, JotForm, Calen
 - Set `tss_closeReason` — mandatory text explaining outcome
 - **If Won**:
   - Set `tss_poNumber`
+  - Mark winning quotation: set `tss_isWinningQuote` = Yes on the active TSS_OpportunityQuotation junction record
   - Create TSS_ContractReview record
   - Upload PO to TSS_Opportunity_Documents
   - **Contract Review Process**:
@@ -594,11 +667,11 @@ JotForm does **not** have native ability to dynamically populate dropdowns from 
 
 ```
 TSS_Opportunity_Documents/
-├── TSS-OPP-2026-0001/
+├── OPP-CVX-2026-03-001/
 │   ├── Quotations/
-│   │   ├── TSS-QUO-2026-0001-v1.pdf
-│   │   ├── TSS-QUO-2026-0001-v2.pdf
-│   │   └── TSS-QUO-2026-0001-v3.pdf
+│   │   ├── Q-7K2M9X4P-v1.pdf
+│   │   ├── Q-7K2M9X4P-v2.pdf
+│   │   └── Q-7K2M9X4P-v3.pdf
 │   ├── Purchase Orders/
 │   │   └── PO-12345.pdf
 │   ├── Technical/
@@ -608,9 +681,11 @@ TSS_Opportunity_Documents/
 │   │   └── Tax-Exempt-Certificate.pdf
 │   └── Shipping/
 │       └── Shipping-Manifest-2026-03-15.pdf
-├── TSS-OPP-2026-0002/
+├── OPP-SLB-2026-03-001/
 │   └── ...
 ```
+
+> **Note**: The quotation filenames above use Option A (`Q-7K2M9X4P`) as an example. Actual format depends on the selected hash option (see [Section 8](#8-id-generation-strategy)).
 
 ### Document Library Metadata Columns
 
@@ -631,43 +706,147 @@ TSS_Opportunity_Documents/
 
 ## 8. ID Generation Strategy
 
-### Opportunity IDs
+### Opportunity IDs (Internal — Strategy 2+3)
 
-**Format**: `TSS-OPP-YYYY-NNNN`
-- `TSS` — system prefix
-- `OPP` — entity type
-- `YYYY` — year of creation
-- `NNNN` — sequential number, zero-padded, resets annually
+**Format**: `OPP-[CompanyCode]-YYYY-MM-NNN`
 
-**Examples**: `TSS-OPP-2026-0001`, `TSS-OPP-2026-0042`, `TSS-OPP-2027-0001`
+| Segment | Description | Example |
+|---|---|---|
+| `OPP` | Entity type prefix | `OPP` |
+| `[CompanyCode]` | 2-6 character company abbreviation from TSS_Company | `CVX`, `SLB`, `CNPC` |
+| `YYYY` | Year of creation | `2026` |
+| `MM` | Month of creation (zero-padded) | `03` |
+| `NNN` | Sequential number within company+month, zero-padded | `001` |
 
-### Quotation IDs
+**Examples**:
+- `OPP-CVX-2026-03-001` — First Chevron opportunity in March 2026
+- `OPP-SLB-2026-03-001` — First Schlumberger opportunity in March 2026
+- `OPP-CVX-2026-03-002` — Second Chevron opportunity in March 2026
+- `OPP-TRE-2026-12-001` — First internal (Tejas) opportunity in December 2026
+- `OPP-CNPC-2027-01-001` — First CNPC opportunity in January 2027
 
-**Format**: `TSS-QUO-YYYY-NNNN`
+**Why This Format**:
+- **Instantly decodable** — sales reps see the customer, timing, and sequence at a glance
+- **Sortable** — sorts naturally by company, then chronologically
+- **No volume leakage** — counters are per-company-per-month, so competitors can't infer total deal count
+- **Collision-free** — company code + year + month + sequence is unique
 
-**Examples**: `TSS-QUO-2026-0001`, `TSS-QUO-2026-0015`
+### Quotation IDs (External-Facing — Hash-Based)
 
-### How Sequential Numbers are Generated
+Quotation IDs appear on documents sent to customers. A sequential format (QUO-0001, QUO-0002) reveals business volume to clients. Hash-based IDs provide opaque, professional identifiers.
+
+**⚠️ Decision Required**: Choose one of the following 4 options:
+
+#### Option A: Short Alphanumeric Hash
+
+**Format**: `Q-[8 chars]`
+
+Generated from: `SHA-256(opportunityId + version + timestamp)`, take first 8 characters (base36: 0-9, A-Z).
+
+| Example | Notes |
+|---|---|
+| `Q-7K2M9X4P` | 8 chars = 2.8 trillion combinations (base36^8) |
+| `Q-B3N5R8W1` | Short enough for verbal reference ("Quote Q-B3N5R8W1") |
+| `Q-F9D2L6T4` | No dashes within hash portion — clean appearance |
+
+**Pros**: Very short, easy to reference verbally, fits well on documents.
+**Cons**: Smallest collision space of the 4 options (still astronomically unlikely at CRM scale).
+**Collision probability**: < 1 in 1 billion at 10,000 quotes.
+
+#### Option B: UUID-Style Segmented Hash
+
+**Format**: `QUO-[XXXX]-[XXXX]`
+
+Generated from: `SHA-256(opportunityId + version + timestamp)`, formatted as two 4-character hex segments.
+
+| Example | Notes |
+|---|---|
+| `QUO-A3F7-9C2E` | Looks like a professional reference number |
+| `QUO-7B1D-4E8A` | Segments make it easier to read/dictate |
+| `QUO-D5F2-1A9C` | 8 hex chars = 4.3 billion combinations |
+
+**Pros**: Professional appearance, segmented for readability, familiar format.
+**Cons**: Slightly longer than Option A; hex characters only (0-9, A-F) vs full alphanumeric.
+**Collision probability**: < 1 in 100 million at 10,000 quotes.
+
+#### Option C: Year-Prefixed Hash
+
+**Format**: `Q-YYYY-[XXXXXX]`
+
+Generated from: `SHA-256(opportunityId + version + timestamp)`, take 6 alphanumeric characters, prefixed with creation year.
+
+| Example | Notes |
+|---|---|
+| `Q-2026-K7M3P9` | Year provides temporal context without revealing volume |
+| `Q-2026-B2N8W5` | Customer knows roughly when quote was generated |
+| `Q-2027-R4D6F1` | 6 chars = 2.2 billion combinations (base36^6) per year |
+
+**Pros**: Year gives useful context (for filing, aging), hash prevents volume inference, resets collision space annually.
+**Cons**: Longer format; year is somewhat redundant if the quote document is dated.
+**Collision probability**: < 1 in 100 million at 10,000 quotes/year.
+
+#### Option D: Checksum-Verified Hash
+
+**Format**: `Q-[6 chars]-[2 char check]`
+
+Generated from: `SHA-256(opportunityId + version + timestamp)`, take first 6 characters (base36), append 2-character Luhn-mod-36 checksum.
+
+| Example | Notes |
+|---|---|
+| `Q-7K2M9X-P4` | 6 hash + 2 check = data entry error detection |
+| `Q-B3N5R8-W1` | If customer misquotes one character, system detects it |
+| `Q-F9D2L6-T4` | Checksum validated on lookup — "Did you mean Q-F9D2L6-T4?" |
+
+**Pros**: Built-in error detection for manual entry (phone/email), professional appearance, catches typos.
+**Cons**: More complex generation logic; 2 extra characters; customers may not understand the dash-separated check digits.
+**Collision probability**: < 1 in 100 million at 10,000 quotes (6-char hash space).
+
+#### Quotation ID Comparison
+
+| Aspect | Option A | Option B | Option C | Option D |
+|---|---|---|---|---|
+| **Format** | `Q-7K2M9X4P` | `QUO-A3F7-9C2E` | `Q-2026-K7M3P9` | `Q-7K2M9X-P4` |
+| **Length** | 10 chars | 13 chars | 13 chars | 12 chars |
+| **Character set** | Base36 (0-9,A-Z) | Hex (0-9,A-F) | Base36 (0-9,A-Z) | Base36 (0-9,A-Z) |
+| **Temporal context** | None | None | Year visible | None |
+| **Error detection** | None | None | None | Luhn checksum |
+| **Verbal readability** | Good | Good (segmented) | Good | Good (segmented) |
+| **Volume privacy** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Complexity** | Low | Low | Low | Medium |
+
+### How IDs are Generated
 
 SharePoint Lists don't have auto-increment custom columns. Strategy:
 
-1. **TSS_Sequence** list — a dedicated list that stores the current counter:
+1. **TSS_Sequence** list — stores current counters per scope:
 
-| Column | Type | Purpose |
-|---|---|---|
-| Title | Single line text | Entity type: "OPP", "QUO" |
-| Year | Number | Current year: 2026 |
-| Counter | Number | Current sequence: 42 |
+| Column | Internal Name | Type | Required | Notes |
+|---|---|---|---|---|
+| Scope Key | `Title` | Single line text | Yes | Unique key: `OPP-CVX-2026-03` (entity-company-year-month) |
+| Counter | `tss_counter` | Number | Yes | Current sequence value |
 
-2. **Azure Function** handles ID generation:
-   - Read current counter for entity type + year
+**Scope key examples**:
+- `OPP-CVX-2026-03` → counter for Chevron opportunities in March 2026
+- `OPP-SLB-2026-03` → counter for Schlumberger opportunities in March 2026
+- `QUO` → single global counter for quotation hash seed (if needed for uniqueness)
+
+2. **Azure Function** (`generate-id`) handles Opportunity ID generation:
+   - Receive company code + entity type
+   - Compute scope key: `OPP-[companyCode]-YYYY-MM`
+   - Read current counter for scope key (or create with counter = 0 if new month/company)
    - Increment counter
    - Update SharePoint item (with ETag for optimistic concurrency)
-   - Return formatted ID
+   - Return formatted ID: `OPP-[companyCode]-YYYY-MM-[counter padded to 3]`
 
-3. If year has changed, reset counter to 1.
+3. **Azure Function** (`generate-quote-id`) handles Quotation ID generation:
+   - Receive opportunity ID + version number
+   - Compute `SHA-256(opportunityId + version + Date.now())`
+   - Format per selected option (A, B, C, or D)
+   - Verify uniqueness against TSS_Quotation (query for existing `tss_quoteId`)
+   - If collision (astronomically unlikely), re-hash with additional entropy
+   - Return formatted quote ID
 
-This ensures globally unique, human-readable IDs even with concurrent users.
+4. **Concurrency**: ETag-based optimistic locking ensures no two concurrent requests get the same sequence number. If ETag conflict, retry (up to 3 attempts).
 
 ---
 
@@ -761,8 +940,8 @@ This ensures globally unique, human-readable IDs even with concurrent users.
 
 | Setting | Value |
 |---|---|
-| **Site URL** | `/sites/TSS` |
-| **Site Template** | Team site (no Microsoft 365 Group) or Communication site |
+| **Site URL** | `https://tejasre.sharepoint.com/sites/sales` (existing site) |
+| **Site Template** | Existing team site |
 | **Permissions** | TSS users added to site Members group |
 
 ### 9.7 Power Automate
@@ -800,7 +979,7 @@ This ensures globally unique, human-readable IDs even with concurrent users.
        │               │               │               │
        ▼               ▼               ▼               ▼
   React SPA      Azure Functions   SharePoint Site   JotForm SSO
-  (MSAL Browser)  (Managed ID)     (/sites/TSS)     (SAML)
+  (MSAL Browser)  (Managed ID)     (/sites/sales)   (SAML)
        │               │               │               │
        └───────┬───────┘               │               │
                │                       │               │
@@ -832,7 +1011,7 @@ Start with a **minimal working system** and add features incrementally. Each sta
 | MSAL integration | Login with Microsoft 365, acquire Graph API tokens |
 | Azure Static Web Apps | Deploy pipeline via GitHub Actions |
 | Azure Functions project | Isolated worker model, co-deployed with SPA |
-| SharePoint site | Create `/sites/TSS` site, verify Graph API connectivity |
+| SharePoint site | Configure existing `https://tejasre.sharepoint.com/sites/sales` site, verify Graph API connectivity |
 | Environment config | Azure Key Vault, environment variables, Managed Identity |
 
 **Deliverable**: User can log in with M365 credentials and see a blank dashboard. Deployment pipeline pushes on every commit.
@@ -843,13 +1022,13 @@ Start with a **minimal working system** and add features incrementally. Each sta
 
 | Task | Description |
 |---|---|
-| SharePoint Lists | Create TSS_Country, TSS_Product, TSS_Company, TSS_Contact, TSS_InternalTeam, TSS_Opportunity |
+| SharePoint Lists | Create TSS_Country, TSS_Product, TSS_Company, TSS_Contact, TSS_InternalTeam, TSS_Opportunity + seed reference data (146 countries, 133 companies, 36 contacts) |
 | Naming standards | Apply `TSS_` prefix, `tss_` column naming, indexing strategy |
 | Company CRUD | List, create, edit, view companies with search/filter |
 | Contact CRUD | List, create, edit, view contacts linked to companies |
 | Opportunity CRUD | Create opportunities, assign stage, link to company/contact |
 | Product catalog | Seed TSS_Product with Tejas product line |
-| ID generation | TSS_Sequence list + Azure Function for `TSS-OPP-YYYY-NNNN` |
+| ID generation | TSS_Sequence list + Azure Function for `OPP-[CompanyCode]-YYYY-MM-NNN` |
 | Pipeline view | Basic Kanban board showing opportunities by stage |
 | Navigation | App shell with sidebar navigation |
 
@@ -896,8 +1075,9 @@ Start with a **minimal working system** and add features incrementally. Each sta
 | TSS_OpportunityLineItem | Line items with product, quantity, price, notes |
 | Product picker | Search/browse TSS_Product catalog, add to opportunity |
 | TSS_Quotation | Quote lifecycle: Draft → In Review → Approved → Sent |
-| Quote ID generation | `TSS-QUO-YYYY-NNNN` via sequence Azure Function |
-| Quote versioning | Create new version, mark previous as Superseded |
+| TSS_OpportunityQuotation | Junction list linking opportunities ↔ quotations with version tracking |
+| Quote ID generation | Hash-based quote ID via `generate-quote-id` Azure Function |
+| Quote versioning | Create new version, mark previous as Superseded; update junction active/winning flags |
 | Document library | TSS_Opportunity_Documents with folder structure per opportunity |
 | Quote PDF | Generate PDF from quotation data (React PDF or server-side) |
 | Upload/download | Upload documents to library, view attached docs |
