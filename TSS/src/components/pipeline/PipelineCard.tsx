@@ -4,12 +4,13 @@ import type { Opportunity } from '@/types';
 
 interface PipelineCardProps {
   opportunity: Opportunity;
+  companyName?: string;
 }
 
 const formatCurrency = (value?: number) =>
   value != null ? `$${value.toLocaleString()}` : '';
 
-export function PipelineCard({ opportunity }: PipelineCardProps) {
+export function PipelineCard({ opportunity, companyName }: PipelineCardProps) {
   const navigate = useNavigate();
 
   const daysInStage = Math.floor(
@@ -27,7 +28,7 @@ export function PipelineCard({ opportunity }: PipelineCardProps) {
             {opportunity.Title}
           </p>
           <p className="text-xs text-gray-500 truncate">
-            {opportunity.tss_companyId?.LookupValue}
+            {companyName ?? '—'}
           </p>
         </div>
       </div>

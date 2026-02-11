@@ -19,71 +19,9 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useContacts, type UseContactsOptions } from '@/hooks/useContacts';
+import { useCompanies } from '@/hooks/useCompanies';
 import type { Contact } from '@/types';
 import { DEPARTMENTS } from '@/types';
-
-const columns: TableColumnDefinition<Contact>[] = [
-  createTableColumn<Contact>({
-    columnId: 'name',
-    compare: (a, b) => a.Title.localeCompare(b.Title),
-    renderHeaderCell: () => 'Full Name',
-    renderCell: (item) => (
-      <span className="font-medium text-gray-900">{item.Title}</span>
-    ),
-  }),
-  createTableColumn<Contact>({
-    columnId: 'preferredName',
-    compare: (a, b) => (a.tss_preferredName ?? '').localeCompare(b.tss_preferredName ?? ''),
-    renderHeaderCell: () => 'Preferred Name',
-    renderCell: (item) => item.tss_preferredName ?? '—',
-  }),
-  createTableColumn<Contact>({
-    columnId: 'email',
-    compare: (a, b) => (a.tss_email ?? '').localeCompare(b.tss_email ?? ''),
-    renderHeaderCell: () => 'Email',
-    renderCell: (item) => item.tss_email ?? '—',
-  }),
-  createTableColumn<Contact>({
-    columnId: 'phone',
-    renderHeaderCell: () => 'Phone',
-    renderCell: (item) => item.tss_phone ?? '—',
-  }),
-  createTableColumn<Contact>({
-    columnId: 'company',
-    compare: (a, b) =>
-      (a.tss_companyId?.LookupValue ?? '').localeCompare(b.tss_companyId?.LookupValue ?? ''),
-    renderHeaderCell: () => 'Company',
-    renderCell: (item) => item.tss_companyId?.LookupValue ?? '—',
-  }),
-  createTableColumn<Contact>({
-    columnId: 'jobTitle',
-    compare: (a, b) => (a.tss_jobTitle ?? '').localeCompare(b.tss_jobTitle ?? ''),
-    renderHeaderCell: () => 'Job Title',
-    renderCell: (item) => item.tss_jobTitle ?? '—',
-  }),
-  createTableColumn<Contact>({
-    columnId: 'decisionMaker',
-    renderHeaderCell: () => 'Decision Maker',
-    renderCell: (item) =>
-      item.tss_isDecisionMaker ? (
-        <Badge appearance="filled" color="important" size="small">DM</Badge>
-      ) : (
-        '—'
-      ),
-  }),
-  createTableColumn<Contact>({
-    columnId: 'active',
-    renderHeaderCell: () => 'Status',
-    renderCell: (item) => (
-      <Badge
-        appearance="filled"
-        color={item.tss_isActive ? 'success' : 'danger'}
-      >
-        {item.tss_isActive ? 'Active' : 'Inactive'}
-      </Badge>
-    ),
-  }),
-];
 
 export function ContactList() {
   const navigate = useNavigate();
@@ -100,6 +38,78 @@ export function ContactList() {
   );
 
   const { data: contacts, isLoading, error, refetch } = useContacts(options);
+  const { data: companies } = useCompanies();
+
+  // Build company lookup map: SharePoint ID → company name
+  const companyMap = useMemo(() => {
+    const map = new Map<number, string>();
+    if (companies) {
+      for (const c of companies) {
+        map.set(c.id, c.Title);
+      }
+    }
+    return map;
+  }, [companies]);
+
+  const getCompanyName = (contact: Contact): string =>
+    (contact.tss_companyId?.LookupId && companyMap.get(contact.tss_companyId.LookupId)) || '—';
+
+  const columns: TableColumnDefinition<Contact>[] = useMemo(() => [
+    createTableColumn<Contact>({
+      columnId: 'name',
+      compare: (a, b) => a.Title.localeCompare(b.Title),
+      renderHeaderCell: () => 'Full Name',
+      renderCell: (item) => (
+        <span className="font-medium text-gray-900">{item.Title}</span>
+      ),
+    }),
+    createTableColumn<Contact>({
+      columnId: 'email',
+      compare: (a, b) => (a.tss_email ?? '').localeCompare(b.tss_email ?? ''),
+      renderHeaderCell: () => 'Email',
+      renderCell: (item) => (
+        <span className="text-sm truncate">{item.tss_email ?? '—'}</span>
+      ),
+    }),
+    createTableColumn<Contact>({
+      columnId: 'phone',
+      renderHeaderCell: () => 'Phone',
+      renderCell: (item) => (
+        <span className="text-sm truncate">{item.tss_phone ?? '—'}</span>
+      ),
+    }),
+    createTableColumn<Contact>({
+      columnId: 'company',
+      renderHeaderCell: () => 'Company',
+      renderCell: (item) => getCompanyName(item),
+    }),
+    createTableColumn<Contact>({
+      columnId: 'jobTitle',
+      compare: (a, b) => (a.tss_jobTitle ?? '').localeCompare(b.tss_jobTitle ?? ''),
+      renderHeaderCell: () => 'Job Title',
+      renderCell: (item) => item.tss_jobTitle ?? '—',
+    }),
+    createTableColumn<Contact>({
+      columnId: 'decisionMaker',
+      renderHeaderCell: () => 'DM',
+      renderCell: (item) =>
+        item.tss_isDecisionMaker ? (
+          <Badge appearance="filled" color="important" size="small">DM</Badge>
+        ) : null,
+    }),
+    createTableColumn<Contact>({
+      columnId: 'active',
+      renderHeaderCell: () => 'Status',
+      renderCell: (item) => (
+        <Badge
+          appearance="filled"
+          color={item.tss_isActive ? 'success' : 'danger'}
+        >
+          {item.tss_isActive ? 'Active' : 'Inactive'}
+        </Badge>
+      ),
+    }),
+  ], [companyMap]);
 
   if (isLoading) return <LoadingState message="Loading contacts..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;

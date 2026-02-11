@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { useOpportunity, useUpdateOpportunity } from '@/hooks/useOpportunities';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import {
   OPPORTUNITY_STAGES,
   STAGE_COLORS,
@@ -50,6 +51,7 @@ export function OpportunityDetail() {
   const opportunityId = id ? Number(id) : undefined;
   const { data: opportunity, isLoading, error, refetch } = useOpportunity(opportunityId);
   const updateOpportunity = useUpdateOpportunity();
+  const { companyMap, contactMap, resolve } = useLookupMaps();
 
   if (isLoading) return <LoadingState message="Loading opportunity..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -197,7 +199,7 @@ export function OpportunityDetail() {
                 to={`/companies/${opportunity.tss_companyId.LookupId}`}
                 className="text-sm text-blue-600 hover:underline"
               >
-                {opportunity.tss_companyId.LookupValue}
+                {resolve(opportunity.tss_companyId?.LookupId, companyMap)}
               </Link>
             </dd>
           </div>
@@ -209,7 +211,7 @@ export function OpportunityDetail() {
                   to={`/contacts/${opportunity.tss_primaryContactId.LookupId}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  {opportunity.tss_primaryContactId.LookupValue}
+                  {resolve(opportunity.tss_primaryContactId.LookupId, contactMap)}
                 </Link>
               </dd>
             </div>
@@ -222,20 +224,12 @@ export function OpportunityDetail() {
                   to={`/opportunities/${opportunity.tss_relatedOpportunityId.LookupId}`}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  {opportunity.tss_relatedOpportunityId.LookupValue}
+                  {resolve(opportunity.tss_relatedOpportunityId.LookupId, companyMap)}
                 </Link>
               </dd>
             </div>
           )}
-          <div className="flex gap-4 py-1.5">
-            <dt className="w-36 text-sm font-medium text-gray-500 flex-shrink-0">Owner</dt>
-            <dd className="text-sm text-gray-900">
-              {opportunity.tss_owner.LookupValue}
-              {opportunity.tss_owner.Email && (
-                <span className="text-gray-500"> ({opportunity.tss_owner.Email})</span>
-              )}
-            </dd>
-          </div>
+          <InfoRow label="Owner" value={opportunity.tss_owner} />
         </dl>
       </div>
 

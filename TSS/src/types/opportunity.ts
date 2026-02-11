@@ -47,7 +47,7 @@ export interface Opportunity {
   tss_bidDueDate?: string;
   tss_deliveryDate?: string;
   tss_closeDate?: string;
-  tss_owner: { LookupId: number; LookupValue: string; Email?: string };
+  tss_owner?: string;  // Text field (changed from Person type)
   tss_productLine?: ProductLine;
   tss_basin?: Basin;
   tss_isRelated?: boolean;

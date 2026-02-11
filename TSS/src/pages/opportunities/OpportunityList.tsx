@@ -19,6 +19,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useOpportunities, type UseOpportunitiesOptions } from '@/hooks/useOpportunities';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import type { Opportunity } from '@/types';
 import { OPPORTUNITY_STAGES, STAGE_COLORS, PRODUCT_LINES, BASINS } from '@/types';
 
@@ -29,62 +30,6 @@ const formatCurrency = (value?: number) =>
 
 const formatDate = (value?: string) =>
   value ? new Date(value).toLocaleDateString() : '—';
-
-const columns: TableColumnDefinition<Opportunity>[] = [
-  createTableColumn<Opportunity>({
-    columnId: 'opportunityId',
-    compare: (a, b) => a.tss_opportunityId.localeCompare(b.tss_opportunityId),
-    renderHeaderCell: () => 'Opportunity ID',
-    renderCell: (item) => (
-      <span className="font-mono text-sm text-gray-600">{item.tss_opportunityId}</span>
-    ),
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'name',
-    compare: (a, b) => a.Title.localeCompare(b.Title),
-    renderHeaderCell: () => 'Name',
-    renderCell: (item) => (
-      <span className="font-medium text-gray-900">{item.Title}</span>
-    ),
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'company',
-    compare: (a, b) => a.tss_companyId.LookupValue.localeCompare(b.tss_companyId.LookupValue),
-    renderHeaderCell: () => 'Company',
-    renderCell: (item) => item.tss_companyId.LookupValue,
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'stage',
-    compare: (a, b) => a.tss_stage.localeCompare(b.tss_stage),
-    renderHeaderCell: () => 'Stage',
-    renderCell: (item) => (
-      <Badge
-        appearance="filled"
-        color={STAGE_COLORS[item.tss_stage] as BadgeColor}
-      >
-        {item.tss_stage}
-      </Badge>
-    ),
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'revenue',
-    compare: (a, b) => (a.tss_revenue ?? 0) - (b.tss_revenue ?? 0),
-    renderHeaderCell: () => 'Revenue',
-    renderCell: (item) => formatCurrency(item.tss_revenue),
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'productLine',
-    compare: (a, b) => (a.tss_productLine ?? '').localeCompare(b.tss_productLine ?? ''),
-    renderHeaderCell: () => 'Product Line',
-    renderCell: (item) => item.tss_productLine ?? '—',
-  }),
-  createTableColumn<Opportunity>({
-    columnId: 'closeDate',
-    compare: (a, b) => (a.tss_closeDate ?? '').localeCompare(b.tss_closeDate ?? ''),
-    renderHeaderCell: () => 'Close Date',
-    renderCell: (item) => formatDate(item.tss_closeDate),
-  }),
-];
 
 export function OpportunityList() {
   const navigate = useNavigate();
@@ -104,6 +49,62 @@ export function OpportunityList() {
   );
 
   const { data: opportunities, isLoading, error, refetch } = useOpportunities(options);
+  const { companyMap, resolve } = useLookupMaps();
+
+  const columns: TableColumnDefinition<Opportunity>[] = useMemo(() => [
+    createTableColumn<Opportunity>({
+      columnId: 'opportunityId',
+      compare: (a, b) => a.tss_opportunityId.localeCompare(b.tss_opportunityId),
+      renderHeaderCell: () => 'Opportunity ID',
+      renderCell: (item) => (
+        <span className="font-mono text-sm text-gray-600">{item.tss_opportunityId}</span>
+      ),
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'name',
+      compare: (a, b) => a.Title.localeCompare(b.Title),
+      renderHeaderCell: () => 'Name',
+      renderCell: (item) => (
+        <span className="font-medium text-gray-900">{item.Title}</span>
+      ),
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'company',
+      renderHeaderCell: () => 'Company',
+      renderCell: (item) => resolve(item.tss_companyId?.LookupId, companyMap),
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'stage',
+      compare: (a, b) => a.tss_stage.localeCompare(b.tss_stage),
+      renderHeaderCell: () => 'Stage',
+      renderCell: (item) => (
+        <Badge
+          appearance="filled"
+          color={STAGE_COLORS[item.tss_stage] as BadgeColor}
+        >
+          {item.tss_stage}
+        </Badge>
+      ),
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'revenue',
+      compare: (a, b) => (a.tss_revenue ?? 0) - (b.tss_revenue ?? 0),
+      renderHeaderCell: () => 'Revenue',
+      renderCell: (item) => formatCurrency(item.tss_revenue),
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'productLine',
+      compare: (a, b) => (a.tss_productLine ?? '').localeCompare(b.tss_productLine ?? ''),
+      renderHeaderCell: () => 'Product Line',
+      renderCell: (item) => item.tss_productLine ?? '—',
+    }),
+    createTableColumn<Opportunity>({
+      columnId: 'closeDate',
+      compare: (a, b) => (a.tss_closeDate ?? '').localeCompare(b.tss_closeDate ?? ''),
+      renderHeaderCell: () => 'Close Date',
+      renderCell: (item) => formatDate(item.tss_closeDate),
+    }),
+  ], [companyMap]);
 
   if (isLoading) return <LoadingState message="Loading opportunities..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;

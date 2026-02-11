@@ -5,6 +5,7 @@ import { PipelineCard } from './PipelineCard';
 interface PipelineColumnProps {
   stage: OpportunityStage;
   opportunities: Opportunity[];
+  companyMap?: Map<number, string>;
   onDrop?: (opportunityId: number, newStage: OpportunityStage) => void;
 }
 
@@ -19,7 +20,7 @@ const stageHeaderColors: Record<string, string> = {
   subtle: 'bg-gray-400',
 };
 
-export function PipelineColumn({ stage, opportunities, onDrop }: PipelineColumnProps) {
+export function PipelineColumn({ stage, opportunities, companyMap, onDrop }: PipelineColumnProps) {
   const totalRevenue = opportunities.reduce((sum, o) => sum + (o.tss_revenue ?? 0), 0);
   const colorKey = STAGE_COLORS[stage];
   const headerColor = stageHeaderColors[colorKey] ?? 'bg-gray-400';
@@ -78,7 +79,10 @@ export function PipelineColumn({ stage, opportunities, onDrop }: PipelineColumnP
               onDragStart={(e) => handleDragStart(e, opp.id)}
               className="cursor-grab active:cursor-grabbing"
             >
-              <PipelineCard opportunity={opp} />
+              <PipelineCard
+                opportunity={opp}
+                companyName={companyMap?.get(opp.tss_companyId?.LookupId) ?? undefined}
+              />
             </div>
           ))
         )}

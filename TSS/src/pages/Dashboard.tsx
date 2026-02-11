@@ -14,6 +14,7 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useContacts } from '@/hooks/useContacts';
 import { useOpportunities, useOpportunitiesByStage } from '@/hooks/useOpportunities';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import type { Opportunity, OpportunityStage } from '@/types';
 import { OPPORTUNITY_STAGES, STAGE_COLORS } from '@/types';
 
@@ -62,10 +63,11 @@ function StatCard({ icon, label, value, subtitle }: StatCardProps) {
 
 interface RecentOpportunityRowProps {
   opportunity: Opportunity;
+  companyName: string;
   onClick: () => void;
 }
 
-function RecentOpportunityRow({ opportunity, onClick }: RecentOpportunityRowProps) {
+function RecentOpportunityRow({ opportunity, companyName, onClick }: RecentOpportunityRowProps) {
   return (
     <button
       type="button"
@@ -77,7 +79,7 @@ function RecentOpportunityRow({ opportunity, onClick }: RecentOpportunityRowProp
           {opportunity.Title}
         </span>
         <span className="text-xs text-gray-500 truncate">
-          {opportunity.tss_companyId?.LookupValue ?? 'No company'}
+          {companyName}
         </span>
       </div>
       <div className="flex items-center gap-3 shrink-0">
@@ -132,6 +134,7 @@ export function Dashboard() {
   const contacts = useContacts();
   const opportunities = useOpportunities();
   const pipeline = useOpportunitiesByStage();
+  const { companyMap, resolve } = useLookupMaps();
 
   // Derive stats from pipeline data
   const pipelineStats = useMemo(() => {
@@ -268,6 +271,7 @@ export function Dashboard() {
                 <RecentOpportunityRow
                   key={opp.id}
                   opportunity={opp}
+                  companyName={resolve(opp.tss_companyId?.LookupId, companyMap)}
                   onClick={() => navigate(`/opportunities/${opp.id}`)}
                 />
               ))

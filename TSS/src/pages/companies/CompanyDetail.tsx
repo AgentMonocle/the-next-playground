@@ -7,6 +7,7 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useCompany, useCompanyTree, useDeleteCompany } from '@/hooks/useCompanies';
 import { useContactsByCompany } from '@/hooks/useContacts';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useState } from 'react';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
@@ -29,6 +30,7 @@ export function CompanyDetail() {
   const { data: subsidiaries } = useCompanyTree(companyId);
   const { data: contacts } = useContactsByCompany(companyId);
   const deleteCompany = useDeleteCompany();
+  const { countryMap, companyMap, resolve } = useLookupMaps();
 
   if (isLoading) return <LoadingState message="Loading company..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -76,7 +78,7 @@ export function CompanyDetail() {
           <InfoRow label="Industry" value={company.tss_industry} />
           <InfoRow label="Type" value={company.tss_companyType} />
           <InfoRow label="Basin/Region" value={company.tss_basin} />
-          <InfoRow label="Country" value={company.tss_countryId?.LookupValue} />
+          <InfoRow label="Country" value={resolve(company.tss_countryId?.LookupId, countryMap)} />
         </dl>
       </div>
 
@@ -101,7 +103,7 @@ export function CompanyDetail() {
             to={`/companies/${company.tss_parentCompanyId.LookupId}`}
             className="text-blue-600 hover:underline"
           >
-            {company.tss_parentCompanyId.LookupValue}
+            {resolve(company.tss_parentCompanyId.LookupId, companyMap)}
           </Link>
         </div>
       )}

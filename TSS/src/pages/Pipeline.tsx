@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { PipelineBoard } from '@/components/pipeline/PipelineBoard';
 import { useOpportunitiesByStage, useUpdateOpportunity } from '@/hooks/useOpportunities';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useUIStore } from '@/stores/uiStore';
 import { OPPORTUNITY_STAGES, BASINS, PRODUCT_LINES } from '@/types';
 import type { OpportunityStage } from '@/types';
@@ -13,6 +14,7 @@ import type { OpportunityStage } from '@/types';
 export function Pipeline() {
   const { data, isLoading, error, refetch } = useOpportunitiesByStage();
   const updateOpportunity = useUpdateOpportunity();
+  const { companyMap } = useLookupMaps();
   const { pipelineFilters, setPipelineFilters, clearPipelineFilters } = useUIStore();
 
   const handleStageChange = useCallback(
@@ -98,7 +100,7 @@ export function Pipeline() {
       </div>
 
       {/* Board */}
-      <PipelineBoard data={filteredData} onStageChange={handleStageChange} />
+      <PipelineBoard data={filteredData} companyMap={companyMap} onStageChange={handleStageChange} />
     </div>
   );
 }

@@ -4,10 +4,11 @@ import { PipelineColumn } from './PipelineColumn';
 
 interface PipelineBoardProps {
   data: Record<OpportunityStage, Opportunity[]>;
+  companyMap?: Map<number, string>;
   onStageChange: (opportunityId: number, newStage: OpportunityStage) => void;
 }
 
-export function PipelineBoard({ data, onStageChange }: PipelineBoardProps) {
+export function PipelineBoard({ data, companyMap, onStageChange }: PipelineBoardProps) {
   return (
     <div className="flex gap-3 overflow-x-auto pb-4">
       {OPPORTUNITY_STAGES.map((stage) => (
@@ -15,6 +16,7 @@ export function PipelineBoard({ data, onStageChange }: PipelineBoardProps) {
           key={stage}
           stage={stage}
           opportunities={data[stage] ?? []}
+          companyMap={companyMap}
           onDrop={onStageChange}
         />
       ))}

@@ -6,6 +6,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useContact, useDeleteContact } from '@/hooks/useContacts';
+import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useState } from 'react';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
@@ -26,6 +27,7 @@ export function ContactDetail() {
   const contactId = id ? Number(id) : undefined;
   const { data: contact, isLoading, error, refetch } = useContact(contactId);
   const deleteContact = useDeleteContact();
+  const { companyMap, resolve } = useLookupMaps();
 
   if (isLoading) return <LoadingState message="Loading contact..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -41,8 +43,7 @@ export function ContactDetail() {
     <div className="space-y-6">
       <PageHeader
         title={contact.Title}
-        subtitle={contact.tss_companyId?.LookupValue
-        }
+        subtitle={resolve(contact.tss_companyId?.LookupId, companyMap)}
         actions={
           <>
             <Button
@@ -110,7 +111,7 @@ export function ContactDetail() {
             to={`/companies/${contact.tss_companyId.LookupId}`}
             className="text-blue-600 hover:underline"
           >
-            {contact.tss_companyId.LookupValue}
+            {resolve(contact.tss_companyId.LookupId, companyMap)}
           </Link>
         </div>
       )}

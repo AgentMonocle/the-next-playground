@@ -60,10 +60,19 @@ export async function getListItems<T>(
   const response = await request.get();
 
   const items: T[] = (response.value as Array<{ id: string; fields: Record<string, unknown> }>).map(
-    (item) => ({
-      id: Number(item.id),
-      ...item.fields,
-    }) as T
+    (item) => {
+      const mapped: Record<string, unknown> = { id: Number(item.id) };
+      for (const [key, value] of Object.entries(item.fields)) {
+        // Transform SharePoint lookup fields: "tss_companyIdLookupId" → "tss_companyId" as LookupField
+        if (key.endsWith('LookupId') && key.startsWith('tss_')) {
+          const baseName = key.slice(0, -'LookupId'.length);
+          mapped[baseName] = { LookupId: Number(value), LookupValue: '' };
+        } else {
+          mapped[key] = value;
+        }
+      }
+      return mapped as T;
+    }
   );
 
   return {
@@ -109,13 +118,20 @@ export async function getListItem<T>(
 
   const response = await client
     .api(`/sites/${siteId}/lists/${listName}/items/${itemId}`)
+    .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
     .expand('fields')
     .get();
 
-  return {
-    id: Number(response.id),
-    ...response.fields,
-  } as T;
+  const mapped: Record<string, unknown> = { id: Number(response.id) };
+  for (const [key, value] of Object.entries(response.fields as Record<string, unknown>)) {
+    if (key.endsWith('LookupId') && key.startsWith('tss_')) {
+      const baseName = key.slice(0, -'LookupId'.length);
+      mapped[baseName] = { LookupId: Number(value), LookupValue: '' };
+    } else {
+      mapped[key] = value;
+    }
+  }
+  return mapped as T;
 }
 
 // ─── Write Operations ───────────────────────────────────────────────────────
