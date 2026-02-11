@@ -88,7 +88,6 @@ export function CompanyList() {
       industry: industry || undefined,
       companyType: companyType || undefined,
       basin: basin || undefined,
-      isActive: true,
     }),
     [search, industry, companyType, basin]
   );

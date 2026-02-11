@@ -36,6 +36,7 @@ export async function getListItems<T>(
 
   let request = client
     .api(`/sites/${siteId}/lists/${listName}/items`)
+    .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
     .expand('fields')
     .top(top);
 

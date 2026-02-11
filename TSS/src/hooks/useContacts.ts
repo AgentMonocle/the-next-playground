@@ -48,7 +48,6 @@ export function useContacts(options: UseContactsOptions = {}) {
       const conditions: FilterCondition[] = [];
       if (options.companyId) conditions.push({ field: 'tss_companyIdLookupId', operator: 'eq', value: options.companyId });
       if (options.department) conditions.push({ field: 'tss_department', operator: 'eq', value: options.department });
-      if (options.isActive !== undefined) conditions.push({ field: 'tss_isActive', operator: 'eq', value: options.isActive });
 
       const queryOptions: ListQueryOptions = {
         filter: conditions.length > 0 ? buildFilter(conditions) : undefined,
@@ -58,6 +57,11 @@ export function useContacts(options: UseContactsOptions = {}) {
 
       const result = await getListItems<Contact>(client, LIST_NAME, queryOptions);
       let items = result.items;
+
+      // Client-side boolean filter (SharePoint OData boolean filtering is unreliable)
+      if (options.isActive !== undefined) {
+        items = items.filter((c) => c.tss_isActive === options.isActive);
+      }
 
       if (options.search) {
         const term = options.search.toLowerCase();
@@ -96,12 +100,11 @@ export function useContactsByCompany(companyId: number | undefined) {
       const result = await getListItems<Contact>(client, LIST_NAME, {
         filter: buildFilter([
           { field: 'tss_companyIdLookupId', operator: 'eq', value: companyId! },
-          { field: 'tss_isActive', operator: 'eq', value: true },
         ]),
         orderBy: 'fields/Title',
         top: 200,
       });
-      return result.items;
+      return result.items.filter((c) => c.tss_isActive !== false);
     },
     enabled: companyId !== undefined,
   });

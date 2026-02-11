@@ -51,7 +51,6 @@ export function useCompanies(options: UseCompaniesOptions = {}) {
       if (options.industry) conditions.push({ field: 'tss_industry', operator: 'eq', value: options.industry });
       if (options.companyType) conditions.push({ field: 'tss_companyType', operator: 'eq', value: options.companyType });
       if (options.basin) conditions.push({ field: 'tss_basin', operator: 'eq', value: options.basin });
-      if (options.isActive !== undefined) conditions.push({ field: 'tss_isActive', operator: 'eq', value: options.isActive });
 
       const queryOptions: ListQueryOptions = {
         filter: conditions.length > 0 ? buildFilter(conditions) : undefined,
@@ -61,6 +60,11 @@ export function useCompanies(options: UseCompaniesOptions = {}) {
 
       const result = await getListItems<Company>(client, LIST_NAME, queryOptions);
       let items = result.items;
+
+      // Client-side boolean filter (SharePoint OData boolean filtering is unreliable)
+      if (options.isActive !== undefined) {
+        items = items.filter((c) => c.tss_isActive === options.isActive);
+      }
 
       // Client-side search (SharePoint OData contains is limited)
       if (options.search) {
