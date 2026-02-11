@@ -61,7 +61,7 @@ export async function getListItems<T>(
 
   const items: T[] = (response.value as Array<{ id: string; fields: Record<string, unknown> }>).map(
     (item) => {
-      const mapped: Record<string, unknown> = { id: Number(item.id) };
+      const mapped: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(item.fields)) {
         // Transform SharePoint lookup fields: "tss_companyIdLookupId" → "tss_companyId" as LookupField
         if (key.endsWith('LookupId') && key.startsWith('tss_')) {
@@ -71,6 +71,8 @@ export async function getListItems<T>(
           mapped[key] = value;
         }
       }
+      // Set id last so SharePoint's fields.id (string) doesn't overwrite our numeric id
+      mapped.id = Number(item.id);
       return mapped as T;
     }
   );
@@ -122,7 +124,7 @@ export async function getListItem<T>(
     .expand('fields')
     .get();
 
-  const mapped: Record<string, unknown> = { id: Number(response.id) };
+  const mapped: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(response.fields as Record<string, unknown>)) {
     if (key.endsWith('LookupId') && key.startsWith('tss_')) {
       const baseName = key.slice(0, -'LookupId'.length);
@@ -131,6 +133,8 @@ export async function getListItem<T>(
       mapped[key] = value;
     }
   }
+  // Set id last so SharePoint's fields.id (string) doesn't overwrite our numeric id
+  mapped.id = Number(response.id);
   return mapped as T;
 }
 
