@@ -1,0 +1,113 @@
+import type { ListDefinition } from '../lib/graphAdmin.js';
+
+export const companyList: ListDefinition = {
+  displayName: 'TSS_Company',
+  description: 'Customer accounts and company records',
+  columns: [
+    {
+      name: 'tss_companyCode',
+      displayName: 'Company Code',
+      type: 'text',
+      required: true,
+      indexed: true,
+      maxLength: 6,
+    },
+    {
+      name: 'tss_industry',
+      displayName: 'Industry',
+      type: 'choice',
+      indexed: true,
+      choices: [
+        'Oil & Gas E&P',
+        'Oil & Gas Services',
+        'CCS/CCUS',
+        'Geothermal',
+        'Engineering',
+        'Government/Research',
+        'Other',
+      ],
+    },
+    {
+      name: 'tss_countryId',
+      displayName: 'Country',
+      type: 'lookup',
+      lookupListName: 'TSS_Country',
+      lookupColumnName: 'Title',
+    },
+    {
+      name: 'tss_isSubsidiary',
+      displayName: 'Is Subsidiary',
+      type: 'boolean',
+    },
+    {
+      name: 'tss_parentCompanyId',
+      displayName: 'Parent Company',
+      type: 'lookup',
+      lookupListName: 'TSS_Company',
+      lookupColumnName: 'Title',
+      indexed: true,
+    },
+    {
+      name: 'tss_website',
+      displayName: 'Website',
+      type: 'hyperlink',
+    },
+    {
+      name: 'tss_phone',
+      displayName: 'Phone',
+      type: 'text',
+    },
+    {
+      name: 'tss_address',
+      displayName: 'Address',
+      type: 'note',
+    },
+    {
+      name: 'tss_owner',
+      displayName: 'Owner',
+      type: 'person',
+      indexed: true,
+    },
+    {
+      name: 'tss_companyType',
+      displayName: 'Company Type',
+      type: 'choice',
+      indexed: true,
+      choices: [
+        'Operator',
+        'Service Company',
+        'Engineering Client',
+        'Testing Client',
+        'Government/Research',
+        'Distributor',
+      ],
+    },
+    {
+      name: 'tss_basin',
+      displayName: 'Basin/Region',
+      type: 'choice',
+      indexed: true,
+      choices: [
+        'Permian',
+        'Eagle Ford',
+        'DJ Basin',
+        'Bakken',
+        'GoM',
+        'Marcellus',
+        'International',
+        'Other',
+      ],
+    },
+    {
+      name: 'tss_notes',
+      displayName: 'Notes',
+      type: 'note',
+    },
+    {
+      name: 'tss_isActive',
+      displayName: 'Is Active',
+      type: 'boolean',
+      required: true,
+    },
+  ],
+};
