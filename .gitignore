@@ -1,10 +1,8 @@
 # Dependencies
 node_modules/
-api/node_modules/
 
 # Build output
 dist/
-api/dist/
 
 # Environment variables
 .env.local
