@@ -7,12 +7,20 @@ import { getSiteId } from '@/lib/graph/sharepoint';
 type Status = 'checking' | 'connected' | 'error';
 
 export function ConnectivityCheck() {
-  const { instance } = useMsal();
+  const { instance, accounts } = useMsal();
   const [status, setStatus] = useState<Status>('checking');
   const [siteId, setSiteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const account = accounts[0];
+    if (!account) return;
+
+    // Ensure MSAL knows the active account
+    if (!instance.getActiveAccount()) {
+      instance.setActiveAccount(account);
+    }
+
     async function checkConnectivity() {
       try {
         const client = getGraphClient(instance);
@@ -25,7 +33,7 @@ export function ConnectivityCheck() {
       }
     }
     checkConnectivity();
-  }, [instance]);
+  }, [instance, accounts]);
 
   return (
     <div className="bg-white rounded-lg border p-4 space-y-2">
