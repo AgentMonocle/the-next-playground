@@ -107,10 +107,7 @@ async function main() {
 
       // Optional fields
       if (company.website) {
-        fields.tss_website = {
-          Url: company.website,
-          Description: company.name,
-        };
+        fields.tss_website = company.website;
       }
       if (company.phone) {
         fields.tss_phone = company.phone;

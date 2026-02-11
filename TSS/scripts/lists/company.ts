@@ -50,7 +50,7 @@ export const companyList: ListDefinition = {
     {
       name: 'tss_website',
       displayName: 'Website',
-      type: 'hyperlink',
+      type: 'text',
     },
     {
       name: 'tss_phone',
@@ -65,7 +65,7 @@ export const companyList: ListDefinition = {
     {
       name: 'tss_owner',
       displayName: 'Owner',
-      type: 'person',
+      type: 'text',
       indexed: true,
     },
     {

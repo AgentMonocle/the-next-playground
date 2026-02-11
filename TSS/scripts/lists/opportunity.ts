@@ -84,7 +84,7 @@ export const opportunityList: ListDefinition = {
     {
       name: 'tss_owner',
       displayName: 'Owner',
-      type: 'person',
+      type: 'text',
       required: true,
       indexed: true,
     },
@@ -152,7 +152,7 @@ export const opportunityList: ListDefinition = {
     {
       name: 'tss_taxDocumentLink',
       displayName: 'Tax Document Link',
-      type: 'hyperlink',
+      type: 'text',
     },
     {
       name: 'tss_notes',

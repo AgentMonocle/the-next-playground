@@ -1,28 +1,40 @@
 /**
  * Graph API client for provisioning scripts.
- * Uses DefaultAzureCredential which falls back through:
- *   1. Environment variables (CI/CD)
- *   2. Managed Identity (Azure)
- *   3. Azure CLI (`az login`) — local dev
+ * Uses DeviceCodeCredential for interactive login with delegated permissions.
+ * This allows the script to act as the signed-in user with full SharePoint access.
  */
 import { Client } from '@microsoft/microsoft-graph-client';
-import { DeviceCodeCredential, DefaultAzureCredential } from '@azure/identity';
+import { DeviceCodeCredential } from '@azure/identity';
 import 'isomorphic-fetch';
 
 const SHAREPOINT_SITE_URL = 'https://tejasre.sharepoint.com/sites/sales';
-const GRAPH_SCOPES = ['https://graph.microsoft.com/.default'];
+const CLIENT_ID = '84b10c49-3622-42ac-8fec-42a84d148b3b';
+const TENANT_ID = 'b274090c-1d9c-4722-8c7e-554c3aafd2b2';
+
+// Delegated (user) scopes for SharePoint list management
+const GRAPH_SCOPES = [
+  'https://graph.microsoft.com/Sites.Manage.All',
+  'https://graph.microsoft.com/Sites.ReadWrite.All',
+];
 
 let cachedClient: Client | null = null;
 let cachedSiteId: string | null = null;
 
 /**
- * Create a Graph client authenticated via DefaultAzureCredential.
- * For local dev, make sure you've run `az login` first.
+ * Create a Graph client authenticated via DeviceCodeCredential.
+ * On first call, prints a URL + code to the console for interactive login.
  */
 export function getAdminClient(): Client {
   if (cachedClient) return cachedClient;
 
-  const credential = new DefaultAzureCredential();
+  const credential = new DeviceCodeCredential({
+    clientId: CLIENT_ID,
+    tenantId: TENANT_ID,
+    userPromptCallback: (info) => {
+      console.log('\n🔐 Authentication required:');
+      console.log(`   ${info.message}`);
+    },
+  });
 
   cachedClient = Client.initWithMiddleware({
     authProvider: {
@@ -271,8 +283,7 @@ export async function ensureList(
       addedCount++;
     } catch (err: unknown) {
       const error = err as { message?: string; statusCode?: number };
-      console.error(`  ❌ Failed to add column ${col.name}: ${error.message ?? 'Unknown error'}`);
-      throw err;
+      console.warn(`  ⚠️  Skipped column ${col.name} (${col.type}): ${error.message ?? 'Unknown error'}`);
     }
   }
 
