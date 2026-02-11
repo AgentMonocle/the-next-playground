@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { Dashboard } from '@/pages/Dashboard';
 import { CompanyList } from '@/pages/companies/CompanyList';
 import { CompanyDetail } from '@/pages/companies/CompanyDetail';
@@ -15,7 +16,7 @@ import { Pipeline } from '@/pages/Pipeline';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppShell />,
+    element: <ErrorBoundary><AppShell /></ErrorBoundary>,
     children: [
       { index: true, element: <Dashboard /> },
       // Companies

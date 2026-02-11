@@ -1,0 +1,226 @@
+[
+  {
+    "name": "Tubing Retrievable Safety Valve (TRSV)",
+    "productCode": "WI-TRSV",
+    "productLine": "Well Intervention",
+    "category": "Safety Valve",
+    "unit": "Each",
+    "basePrice": 15000
+  },
+  {
+    "name": "Wireline Retrievable Safety Valve (WRSV)",
+    "productCode": "WI-WRSV",
+    "productLine": "Well Intervention",
+    "category": "Safety Valve",
+    "unit": "Each",
+    "basePrice": 12500
+  },
+  {
+    "name": "Surface Controlled SSSV (SC-SSSV)",
+    "productCode": "WI-SCSV",
+    "productLine": "Well Intervention",
+    "category": "Safety Valve",
+    "unit": "Each",
+    "basePrice": 18000
+  },
+  {
+    "name": "Hydraulic Set Packer",
+    "productCode": "WI-HPKR",
+    "productLine": "Well Intervention",
+    "category": "Packer",
+    "unit": "Each",
+    "basePrice": 22000
+  },
+  {
+    "name": "Mechanical Set Packer",
+    "productCode": "WI-MPKR",
+    "productLine": "Well Intervention",
+    "category": "Packer",
+    "unit": "Each",
+    "basePrice": 16000
+  },
+  {
+    "name": "Production Packer",
+    "productCode": "NC-PPKR",
+    "productLine": "New Completions",
+    "category": "Packer",
+    "unit": "Each",
+    "basePrice": 25000
+  },
+  {
+    "name": "Liner Hanger Packer",
+    "productCode": "NC-LHPK",
+    "productLine": "New Completions",
+    "category": "Packer",
+    "unit": "Each",
+    "basePrice": 35000
+  },
+  {
+    "name": "Tubing Anchor Catcher",
+    "productCode": "WI-TAC",
+    "productLine": "Well Intervention",
+    "category": "Anchor",
+    "unit": "Each",
+    "basePrice": 4500
+  },
+  {
+    "name": "Hydraulic Anchor",
+    "productCode": "NC-HANC",
+    "productLine": "New Completions",
+    "category": "Anchor",
+    "unit": "Each",
+    "basePrice": 6000
+  },
+  {
+    "name": "Flow Control Lock Mandrel",
+    "productCode": "WI-FCLM",
+    "productLine": "Well Intervention",
+    "category": "Lock",
+    "unit": "Each",
+    "basePrice": 3200
+  },
+  {
+    "name": "Lock Mandrel with Side Pocket",
+    "productCode": "WI-LMSP",
+    "productLine": "Well Intervention",
+    "category": "Lock",
+    "unit": "Each",
+    "basePrice": 4800
+  },
+  {
+    "name": "Landing Nipple",
+    "productCode": "WI-LNIP",
+    "productLine": "Well Intervention",
+    "category": "Nipple",
+    "unit": "Each",
+    "basePrice": 1800
+  },
+  {
+    "name": "No-Go Landing Nipple",
+    "productCode": "NC-NGNP",
+    "productLine": "New Completions",
+    "category": "Nipple",
+    "unit": "Each",
+    "basePrice": 2200
+  },
+  {
+    "name": "Selective Landing Nipple",
+    "productCode": "NC-SLNP",
+    "productLine": "New Completions",
+    "category": "Nipple",
+    "unit": "Each",
+    "basePrice": 2800
+  },
+  {
+    "name": "Float Shoe",
+    "productCode": "NC-FSHO",
+    "productLine": "New Completions",
+    "category": "Cementing Tool",
+    "unit": "Each",
+    "basePrice": 1200
+  },
+  {
+    "name": "Float Collar",
+    "productCode": "NC-FCOL",
+    "productLine": "New Completions",
+    "category": "Cementing Tool",
+    "unit": "Each",
+    "basePrice": 900
+  },
+  {
+    "name": "Stage Cementing Tool",
+    "productCode": "NC-SCMT",
+    "productLine": "New Completions",
+    "category": "Cementing Tool",
+    "unit": "Each",
+    "basePrice": 8500
+  },
+  {
+    "name": "Single-Point Entry Frac Sleeve",
+    "productCode": "NC-SPFS",
+    "productLine": "New Completions",
+    "category": "Frac Sleeve",
+    "unit": "Each",
+    "basePrice": 5500
+  },
+  {
+    "name": "Multi-Point Entry Frac Sleeve",
+    "productCode": "NC-MPFS",
+    "productLine": "New Completions",
+    "category": "Frac Sleeve",
+    "unit": "Each",
+    "basePrice": 7200
+  },
+  {
+    "name": "Cemented Frac Sleeve System",
+    "productCode": "NC-CFSS",
+    "productLine": "New Completions",
+    "category": "Frac Sleeve",
+    "unit": "Set",
+    "basePrice": 45000
+  },
+  {
+    "name": "CO2 Injection Safety Valve",
+    "productCode": "GE-CISV",
+    "productLine": "Green Energy",
+    "category": "Safety Valve",
+    "unit": "Each",
+    "basePrice": 28000
+  },
+  {
+    "name": "Geothermal Completion Packer",
+    "productCode": "GE-GPKR",
+    "productLine": "Green Energy",
+    "category": "Packer",
+    "unit": "Each",
+    "basePrice": 32000
+  },
+  {
+    "name": "Completion Design Engineering",
+    "productCode": "ES-CDES",
+    "productLine": "Engineering Service",
+    "category": "Service",
+    "unit": "Project",
+    "basePrice": 25000
+  },
+  {
+    "name": "Well Integrity Assessment",
+    "productCode": "ES-WIAS",
+    "productLine": "Engineering Service",
+    "category": "Service",
+    "unit": "Project",
+    "basePrice": 18000
+  },
+  {
+    "name": "Valve Performance Testing",
+    "productCode": "TS-VPTS",
+    "productLine": "Testing Service",
+    "category": "Service",
+    "unit": "Day",
+    "basePrice": 5000
+  },
+  {
+    "name": "Pressure Testing & Certification",
+    "productCode": "TS-PTCR",
+    "productLine": "Testing Service",
+    "category": "Service",
+    "unit": "Day",
+    "basePrice": 4500
+  },
+  {
+    "name": "Completions Equipment Training",
+    "productCode": "TR-CEQT",
+    "productLine": "Training",
+    "category": "Service",
+    "unit": "Day",
+    "basePrice": 3500
+  },
+  {
+    "name": "Safety Valve Operation & Maintenance Training",
+    "productCode": "TR-SVOM",
+    "productLine": "Training",
+    "category": "Service",
+    "unit": "Day",
+    "basePrice": 3000
+  }
+]
