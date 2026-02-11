@@ -46,7 +46,7 @@ Browser / Mobile / Teams Tab (iframe)
     │
     ▼
 Azure Static Web Apps
-├── Frontend: React 18 + Vite + TypeScript + TailwindCSS
+├── Frontend: React 19 + Vite + TypeScript + TailwindCSS
 ├── API: Azure Functions v4 (TypeScript, isolated worker)
 │   ├── HTTP triggers (CRUD proxy to Graph API)
 │   ├── Timer triggers (email subscription renewal, digests)
@@ -61,12 +61,61 @@ JotForm Enterprise ──► Power Automate ──► SharePoint Lists
 (Mobile capture, approvals)
 ```
 
+## Repository Structure
+
+```
+the-next-playground/                    # Monorepo root
+├── .beads/                             # Issue tracking (beads)
+├── .claude/                            # Claude Code config
+├── .github/workflows/                  # CI/CD (Azure Static Web Apps)
+├── AGENTS.md                           # Agent instructions
+├── COMPANY_PROFILE.md                  # Business context
+├── DESIGN.md                           # Architecture (this file)
+├── DEVELOPMENT_PLAN.md                 # All stages
+├── STAGE_0_PLAN.md                     # Stage 0 implementation details
+├── ref_datasets/                       # Seed data CSVs
+├── ref_prompts/                        # Scoping prompts
+│
+└── TSS/                                # Tejas Sales System application
+    ├── src/                            # React SPA source
+    │   ├── components/                 # Shared UI components
+    │   │   ├── layout/                 # App shell, sidebar, header
+    │   │   └── common/                 # Buttons, cards, tables
+    │   ├── features/                   # Feature modules (Stage 1+)
+    │   ├── hooks/                      # Custom React hooks
+    │   ├── lib/                        # Utilities & integrations
+    │   │   ├── auth/                   # MSAL config, auth helpers
+    │   │   ├── graph/                  # Graph API client, SharePoint helpers
+    │   │   └── utils/                  # Formatters, validators
+    │   ├── pages/                      # Route pages
+    │   ├── stores/                     # Zustand stores
+    │   ├── types/                      # TypeScript type definitions
+    │   ├── App.tsx                     # Auth-gated root component
+    │   ├── main.tsx                    # Entry point (MSAL + Fluent + React Query)
+    │   └── index.css                   # Tailwind imports
+    ├── api/                            # Azure Functions v4 (isolated worker)
+    │   └── src/functions/              # Function endpoints
+    ├── public/                         # Static assets
+    ├── package.json                    # Frontend deps + dev scripts
+    ├── vite.config.ts                  # Vite + Tailwind + @/ alias
+    ├── tsconfig.json                   # TS project references
+    ├── tsconfig.app.json               # Frontend TS config (path aliases)
+    ├── tsconfig.node.json              # Node/Vite TS config
+    ├── eslint.config.js                # ESLint flat config
+    ├── staticwebapp.config.json        # SWA runtime config
+    ├── swa-cli.config.json             # SWA CLI local dev config
+    ├── .env.example                    # Env var template (committed)
+    └── .env.local                      # Actual env vars (NOT committed)
+```
+
+Design docs and reference data live at the repo root. The TSS application (frontend + API) is self-contained under `TSS/` — all builds run from that directory (`cd TSS && npm run build`).
+
 ## Technology Stack
 
 | Layer | Technology | Version | Status |
 |---|---|---|---|
-| Frontend | React + Vite + TypeScript | 18.x / 6.x / 5.x | Stable |
-| Styling | TailwindCSS | 3.x | Stable |
+| Frontend | React + Vite + TypeScript | 19.x / 7.x / 5.x | Stable |
+| Styling | TailwindCSS | 4.x | Stable |
 | UI Components | Fluent UI React v9 or Headless UI | 9.72+ | Stable |
 | State (client) | Zustand | 5.x | Stable |
 | State (server) | TanStack React Query | 5.x | Stable |
