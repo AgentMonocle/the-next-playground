@@ -18,6 +18,8 @@ import {
   ClipboardTask24Filled,
   Globe24Regular,
   Globe24Filled,
+  Settings24Regular,
+  Settings24Filled,
   PanelLeftContract24Regular,
   PanelLeftExpand24Regular,
 } from '@fluentui/react-icons';
@@ -139,6 +141,29 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Bottom nav — Settings */}
+      <div className="border-t border-gray-200 py-2">
+        <Tooltip
+          content="Settings"
+          relationship="label"
+          visible={sidebarCollapsed ? undefined : false}
+        >
+          <button
+            onClick={() => navigate('/settings')}
+            className={`flex items-center w-full px-4 py-2.5 text-sm transition-colors ${
+              isActive('/settings')
+                ? 'bg-blue-50 text-blue-700 font-medium'
+                : 'text-gray-700 hover:bg-gray-100'
+            } ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
+          >
+            <span className="flex-shrink-0">
+              {isActive('/settings') ? <Settings24Filled /> : <Settings24Regular />}
+            </span>
+            {!sidebarCollapsed && <span className="truncate">Settings</span>}
+          </button>
+        </Tooltip>
+      </div>
     </aside>
   );
 }

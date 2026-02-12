@@ -18,6 +18,7 @@ import { ActivityForm } from '@/pages/activities/ActivityForm';
 import { BasinRegionList } from '@/pages/basinRegions/BasinRegionList';
 import { BasinRegionDetail } from '@/pages/basinRegions/BasinRegionDetail';
 import { BasinRegionForm } from '@/pages/basinRegions/BasinRegionForm';
+import { Settings } from '@/pages/settings/Settings';
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +53,8 @@ export const router = createBrowserRouter([
       { path: 'basin-regions/new', element: <BasinRegionForm /> },
       { path: 'basin-regions/:id', element: <BasinRegionDetail /> },
       { path: 'basin-regions/:id/edit', element: <BasinRegionForm /> },
+      // Settings
+      { path: 'settings', element: <Settings /> },
       // Catch-all
       { path: '*', element: <Navigate to="/" replace /> },
     ],

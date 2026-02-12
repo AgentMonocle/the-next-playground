@@ -227,6 +227,109 @@ export async function deleteSubscription(
 }
 
 // ---------------------------------------------------------------------------
+// GET /api/subscriptions/status/{userId} — Check monitoring status for a user
+// ---------------------------------------------------------------------------
+
+export async function getSubscriptionStatus(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  const userId = request.params.userId;
+  if (!userId) {
+    return {
+      status: 400,
+      jsonBody: { error: 'userId parameter is required.' },
+    };
+  }
+
+  context.log(`subscription-status requested for user ${userId}`);
+
+  try {
+    const client = getGraphClient();
+    const response = await client.api('/subscriptions').get();
+    const subscriptions: SubscriptionResponse[] = response?.value ?? [];
+
+    // Find a subscription whose resource matches /users/{userId}/messages
+    const match = subscriptions.find(
+      (sub) => sub.resource === `/users/${userId}/messages`
+    );
+
+    if (match) {
+      return {
+        status: 200,
+        jsonBody: {
+          monitoring: true,
+          subscriptionId: match.id,
+          expirationDateTime: match.expirationDateTime,
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      jsonBody: { monitoring: false },
+    };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Unknown error checking status.';
+    context.error(`subscription-status failed: ${message}`);
+    return {
+      status: 500,
+      jsonBody: { error: message },
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// DELETE /api/subscriptions/user/{userId} — Remove subscription for a user
+// ---------------------------------------------------------------------------
+
+export async function deleteSubscriptionByUser(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  const userId = request.params.userId;
+  if (!userId) {
+    return {
+      status: 400,
+      jsonBody: { error: 'userId parameter is required.' },
+    };
+  }
+
+  context.log(`delete-subscription-by-user requested for ${userId}`);
+
+  try {
+    const client = getGraphClient();
+    const response = await client.api('/subscriptions').get();
+    const subscriptions: SubscriptionResponse[] = response?.value ?? [];
+
+    const match = subscriptions.find(
+      (sub) => sub.resource === `/users/${userId}/messages`
+    );
+
+    if (!match) {
+      return {
+        status: 404,
+        jsonBody: { error: 'No active subscription found for this user.' },
+      };
+    }
+
+    await client.api(`/subscriptions/${match.id}`).delete();
+    context.log(`Subscription ${match.id} deleted for user ${userId}`);
+
+    return { status: 204 };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Unknown error deleting subscription.';
+    context.error(`delete-subscription-by-user failed: ${message}`);
+    return {
+      status: 500,
+      jsonBody: { error: message },
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Function registrations
 // ---------------------------------------------------------------------------
 
@@ -249,4 +352,18 @@ app.http('deleteSubscription', {
   authLevel: 'anonymous',
   route: 'subscriptions/{id}',
   handler: deleteSubscription,
+});
+
+app.http('getSubscriptionStatus', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'subscriptions/status/{userId}',
+  handler: getSubscriptionStatus,
+});
+
+app.http('deleteSubscriptionByUser', {
+  methods: ['DELETE'],
+  authLevel: 'anonymous',
+  route: 'subscriptions/user/{userId}',
+  handler: deleteSubscriptionByUser,
 });
