@@ -1,0 +1,25 @@
+{
+  "name": "tss-scripts",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SharePoint provisioning and seed scripts for TSS",
+  "scripts": {
+    "provision": "tsx provision.ts",
+    "seed": "tsx seed.ts",
+    "seed:countries": "tsx seed/seedCountries.ts",
+    "seed:companies": "tsx seed/seedCompanies.ts",
+    "seed:contacts": "tsx seed/seedContacts.ts",
+    "seed:products": "tsx seed/seedProducts.ts"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.13.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "isomorphic-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}
