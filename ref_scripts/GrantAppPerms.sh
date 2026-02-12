@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Grant application permissions to SWA Managed Identity using Azure CLI
-# Managed Identity Object ID: 434dce4a-899c-404d-8772-b3614970a795
+# Managed Identity Object ID: 06d318d5-8eb1-4796-98df-b88920377c6b
 
 set -e
 
-MI_OBJECT_ID="434dce4a-899c-404d-8772-b3614970a795"
+MI_OBJECT_ID="06d318d5-8eb1-4796-98df-b88920377c6b"
 
 # Microsoft Graph service principal (well-known appId)
 GRAPH_SP_ID=$(az ad sp show --id "00000003-0000-0000-c000-000000000000" --query "id" -o tsv)
