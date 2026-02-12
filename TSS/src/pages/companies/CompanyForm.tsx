@@ -160,8 +160,8 @@ export function CompanyForm() {
             <Combobox
               value={countries?.find((c) => c.id === form.tss_countryId)?.Title ?? ''}
               onOptionSelect={(_, data) => {
-                const country = countries?.find((c) => c.Title === data.optionText);
-                updateField('tss_countryId', country?.id);
+                const countryId = data.optionValue ? Number(data.optionValue) : undefined;
+                updateField('tss_countryId', countryId);
               }}
               freeform={false}
               clearable
@@ -198,8 +198,8 @@ export function CompanyForm() {
             <Combobox
               value={parentOptions.find((c) => c.id === form.tss_parentCompanyId)?.Title ?? ''}
               onOptionSelect={(_, data) => {
-                const parent = parentOptions.find((c) => c.Title === data.optionText);
-                updateField('tss_parentCompanyId', parent?.id);
+                const parentId = data.optionValue ? Number(data.optionValue) : undefined;
+                updateField('tss_parentCompanyId', parentId);
               }}
               freeform={false}
               clearable

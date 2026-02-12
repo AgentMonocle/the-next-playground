@@ -179,8 +179,8 @@ export function ContactForm() {
           <Combobox
             value={companyOptions.find((c) => c.id === form.tss_companyId)?.Title ?? ''}
             onOptionSelect={(_, data) => {
-              const company = companyOptions.find((c) => c.Title === data.optionText);
-              updateField('tss_companyId', company?.id as number);
+              const companyId = data.optionValue ? Number(data.optionValue) : undefined;
+              updateField('tss_companyId', companyId as number);
             }}
             freeform={false}
             clearable

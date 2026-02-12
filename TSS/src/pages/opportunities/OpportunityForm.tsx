@@ -165,8 +165,8 @@ export function OpportunityForm() {
             <Combobox
               value={selectedCompany?.Title ?? ''}
               onOptionSelect={(_, data) => {
-                const company = companies?.find((c) => c.Title === data.optionText);
-                handleCompanyChange(company?.id);
+                const companyId = data.optionValue ? Number(data.optionValue) : undefined;
+                handleCompanyChange(companyId);
               }}
               freeform={false}
               clearable
@@ -181,8 +181,8 @@ export function OpportunityForm() {
             <Combobox
               value={companyContacts?.find((c) => c.id === form.tss_primaryContactId)?.Title ?? ''}
               onOptionSelect={(_, data) => {
-                const contact = companyContacts?.find((c) => c.Title === data.optionText);
-                updateField('tss_primaryContactId', contact?.id);
+                const contactId = data.optionValue ? Number(data.optionValue) : undefined;
+                updateField('tss_primaryContactId', contactId);
               }}
               freeform={false}
               clearable
