@@ -6,10 +6,13 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { BasinPicker } from '@/components/shared/BasinPicker';
+import { ActivityTimeline } from '@/components/shared/ActivityTimeline';
+import { QuickActions } from '@/components/shared/QuickActions';
 import { useCompany, useCompanyTree, useDeleteCompany } from '@/hooks/useCompanies';
 import { useContactsByCompany } from '@/hooks/useContacts';
 import { useOpportunities } from '@/hooks/useOpportunities';
 import { useCompanyBasins, useAddCompanyBasin, useRemoveCompanyBasin } from '@/hooks/useBasinRegions';
+import { useActivitiesByCompany } from '@/hooks/useActivities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { STAGE_COLORS } from '@/types';
 import { useState, useMemo } from 'react';
@@ -48,6 +51,7 @@ export function CompanyDetail() {
   const { data: companyBasins } = useCompanyBasins(companyId);
   const addBasin = useAddCompanyBasin();
   const removeBasin = useRemoveCompanyBasin();
+  const { data: companyActivities, isLoading: loadingActivities } = useActivitiesByCompany(companyId);
   const deleteCompany = useDeleteCompany();
   const { countryMap, companyMap, resolve } = useLookupMaps();
 
@@ -326,6 +330,17 @@ export function CompanyDetail() {
           <p className="text-sm text-gray-400">No contacts linked to this company.</p>
         )}
       </div>
+
+      {/* Quick Actions */}
+      <QuickActions companyId={companyId} />
+
+      {/* Activity History */}
+      <ActivityTimeline
+        activities={companyActivities}
+        isLoading={loadingActivities}
+        entityType="company"
+        entityId={companyId}
+      />
 
       {/* Notes */}
       {company.tss_notes && (

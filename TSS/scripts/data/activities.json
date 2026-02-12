@@ -1,0 +1,222 @@
+[
+  {
+    "subject": "Initial discovery call with Chevron Permian team",
+    "type": "Call",
+    "date": "2026-01-15T14:00:00Z",
+    "companyCode": "CVX-PRM",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 45,
+    "owner": "Sebastian Nienhuis",
+    "description": "Discussed safety valve requirements for upcoming completions campaign. They are looking at 200+ wells in the Midland Basin this year. Follow up with product specs."
+  },
+  {
+    "subject": "Follow-up call with Devon operations",
+    "type": "Call",
+    "date": "2026-01-17T10:30:00Z",
+    "companyCode": "DVN",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 30,
+    "owner": "Sebastian Nienhuis",
+    "description": "Reviewed packer sizing for their DJ Basin completions. They want us to provide engineering analysis."
+  },
+  {
+    "subject": "Site visit to Pioneer Natural Resources completion site",
+    "type": "Site Visit",
+    "date": "2026-01-20T08:00:00Z",
+    "companyCode": "PXD",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 240,
+    "owner": "Sebastian Nienhuis",
+    "description": "Visited Midland Basin completion site to inspect current safety valve installation. Identified opportunity to upgrade to our latest multi-cycle design."
+  },
+  {
+    "subject": "Meeting with ConocoPhillips procurement",
+    "type": "Meeting",
+    "date": "2026-01-22T15:00:00Z",
+    "companyCode": "COP",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 60,
+    "owner": "Sebastian Nienhuis",
+    "description": "Quarterly review meeting. Discussed pricing for 2026 contract renewal and new product line expansion."
+  },
+  {
+    "subject": "Inbound inquiry from Equinor engineering team",
+    "type": "Call",
+    "date": "2026-01-25T09:00:00Z",
+    "companyCode": "EQNR",
+    "contactEmail": null,
+    "direction": "Inbound",
+    "duration": 20,
+    "owner": "Sebastian Nienhuis",
+    "description": "Equinor reached out about geothermal safety valve applications for their North Sea operations. Very interested in our green energy product line."
+  },
+  {
+    "subject": "SPE workshop attendance",
+    "type": "Trade Show",
+    "date": "2026-01-28T08:00:00Z",
+    "companyCode": null,
+    "contactEmail": null,
+    "direction": "Internal",
+    "duration": 480,
+    "owner": "Sebastian Nienhuis",
+    "description": "Attended SPE Well Integrity workshop in Houston. Made contacts with several operators interested in our digital monitoring solutions."
+  },
+  {
+    "subject": "Sent quotation to ExxonMobil Permian",
+    "type": "Quote Sent",
+    "date": "2026-01-30T11:00:00Z",
+    "companyCode": "XOM",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Sent formal quotation for 150 safety valves for their Q2 2026 completion program. Total quote value $2.1M."
+  },
+  {
+    "subject": "Email exchange with Shell about training",
+    "type": "Email",
+    "date": "2026-02-01T13:00:00Z",
+    "companyCode": "SHEL",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Sent training program details for their GoM operations team. They want onsite training for 20 engineers."
+  },
+  {
+    "subject": "Internal review: Bakken market strategy",
+    "type": "Internal Note",
+    "date": "2026-02-03T09:00:00Z",
+    "companyCode": null,
+    "contactEmail": null,
+    "direction": "Internal",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Reviewed Bakken market opportunities. Key targets: Continental Resources, Hess, Marathon. Need to increase presence in Williston Basin."
+  },
+  {
+    "subject": "PO received from Chevron GoM",
+    "type": "PO Received",
+    "date": "2026-02-04T10:30:00Z",
+    "companyCode": "CVX-GOM",
+    "contactEmail": null,
+    "direction": "Inbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Purchase order received for 75 subsea safety valves. PO# CVX-GOM-2026-0421. Delivery date: May 2026."
+  },
+  {
+    "subject": "Call with Halliburton about partnership",
+    "type": "Call",
+    "date": "2026-02-05T14:00:00Z",
+    "companyCode": "HAL",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 35,
+    "owner": "Sebastian Nienhuis",
+    "description": "Discussed potential partnership for their well intervention services. They want to bundle our products with their service packages."
+  },
+  {
+    "subject": "Meeting with ADNOC delegation",
+    "type": "Meeting",
+    "date": "2026-02-06T10:00:00Z",
+    "companyCode": "ADNOC",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 90,
+    "owner": "Sebastian Nienhuis",
+    "description": "Hosted ADNOC delegation at Houston office. Presented full product line including new completions and green energy solutions."
+  },
+  {
+    "subject": "Follow-up email to Saudi Aramco",
+    "type": "Email",
+    "date": "2026-02-07T08:30:00Z",
+    "companyCode": "ARAMCO",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Sent product specifications and pricing for their 2026 well intervention program as requested during ADIPEC."
+  },
+  {
+    "subject": "Training session: New completions product line",
+    "type": "Training",
+    "date": "2026-02-08T13:00:00Z",
+    "companyCode": null,
+    "contactEmail": null,
+    "direction": "Internal",
+    "duration": 120,
+    "owner": "Sebastian Nienhuis",
+    "description": "Conducted internal training on the new completions product line for the sales team. Covered features, pricing strategy, and competitive positioning."
+  },
+  {
+    "subject": "Quote follow-up call with ExxonMobil",
+    "type": "Call",
+    "date": "2026-02-09T11:00:00Z",
+    "companyCode": "XOM",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 25,
+    "owner": "Sebastian Nienhuis",
+    "description": "Called to follow up on January quote. They are evaluating vs. competitors. Decision expected by end of February."
+  },
+  {
+    "subject": "Shipment dispatched to Chevron Permian",
+    "type": "Shipment",
+    "date": "2026-02-10T07:00:00Z",
+    "companyCode": "CVX-PRM",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Shipped 50 safety valves to Midland, TX distribution center. Tracking# TRE-2026-SHP-0089. Expected arrival Feb 12."
+  },
+  {
+    "subject": "Call with BP about Eagle Ford operations",
+    "type": "Call",
+    "date": "2026-02-10T15:00:00Z",
+    "companyCode": "BP",
+    "contactEmail": null,
+    "direction": "Inbound",
+    "duration": 40,
+    "owner": "Sebastian Nienhuis",
+    "description": "BP reached out about safety valve solutions for their Eagle Ford completions. They are currently using a competitor and looking to switch."
+  },
+  {
+    "subject": "Meeting with Petrobras international team",
+    "type": "Meeting",
+    "date": "2026-02-11T10:00:00Z",
+    "companyCode": "PBR",
+    "contactEmail": null,
+    "direction": "Outbound",
+    "duration": 75,
+    "owner": "Sebastian Nienhuis",
+    "description": "Virtual meeting with Petrobras pre-salt team. Discussed deepwater safety valve specifications for Santos Basin operations."
+  },
+  {
+    "subject": "Internal note: Q1 pipeline review",
+    "type": "Internal Note",
+    "date": "2026-02-11T16:00:00Z",
+    "companyCode": null,
+    "contactEmail": null,
+    "direction": "Internal",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Pipeline is at $15.2M for Q1 with 65% probability-weighted. Need to push harder on Permian and GoM opportunities. ADNOC deal could be transformative for international expansion."
+  },
+  {
+    "subject": "Email from Fervo Energy about geothermal project",
+    "type": "Email",
+    "date": "2026-02-12T09:00:00Z",
+    "companyCode": "FERVO",
+    "contactEmail": null,
+    "direction": "Inbound",
+    "duration": null,
+    "owner": "Sebastian Nienhuis",
+    "description": "Fervo Energy requesting information on our geothermal safety valve design for their Project Red facility in Nevada. High-temperature applications up to 400F."
+  }
+]

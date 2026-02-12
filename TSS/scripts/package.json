@@ -10,7 +10,8 @@
     "seed:countries": "tsx seed/seedCountries.ts",
     "seed:companies": "tsx seed/seedCompanies.ts",
     "seed:contacts": "tsx seed/seedContacts.ts",
-    "seed:products": "tsx seed/seedProducts.ts"
+    "seed:products": "tsx seed/seedProducts.ts",
+    "seed:activities": "tsx seed/seedActivities.ts"
   },
   "dependencies": {
     "@azure/identity": "^4.13.0",

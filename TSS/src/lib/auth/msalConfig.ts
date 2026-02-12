@@ -27,10 +27,12 @@ export const msalConfig: Configuration = {
 };
 
 export const loginRequest = {
-  scopes: ['User.Read', 'Sites.ReadWrite.All'],
+  scopes: ['User.Read', 'Sites.ReadWrite.All', 'Mail.Read', 'Mail.Send', 'Calendars.ReadWrite'],
 };
 
 export const graphScopes = {
   sharePoint: ['Sites.ReadWrite.All'],
   userProfile: ['User.Read'],
+  mail: ['Mail.Read', 'Mail.Send'],
+  calendar: ['Calendars.ReadWrite'],
 };

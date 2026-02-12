@@ -6,16 +6,24 @@ import {
   People24Regular,
   Building24Regular,
   Board24Regular,
+  ClipboardTask24Regular,
   Add24Regular,
+  Mail24Regular,
+  Call24Regular,
+  People24Filled,
+  Location24Regular,
+  Note24Regular,
 } from '@fluentui/react-icons';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useContacts } from '@/hooks/useContacts';
 import { useOpportunities, useOpportunitiesByStage } from '@/hooks/useOpportunities';
+import { useRecentActivities } from '@/hooks/useActivities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
-import type { Opportunity, OpportunityStage } from '@/types';
+import type { Opportunity, OpportunityStage, Activity } from '@/types';
 import { OPPORTUNITY_STAGES, STAGE_COLORS } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -125,6 +133,48 @@ function PipelineStageCard({ stage, count, revenue, maxRevenue }: PipelineStageC
   );
 }
 
+const ACTIVITY_ICONS: Record<string, React.ReactElement> = {
+  Email: <Mail24Regular />,
+  Call: <Call24Regular />,
+  Meeting: <People24Filled />,
+  'Site Visit': <Location24Regular />,
+  'Internal Note': <Note24Regular />,
+};
+
+interface RecentActivityRowProps {
+  activity: Activity;
+  companyName: string;
+  onClick: () => void;
+}
+
+function RecentActivityRow({ activity, companyName, onClick }: RecentActivityRowProps) {
+  const icon = ACTIVITY_ICONS[activity.tss_activityType] ?? <ClipboardTask24Regular />;
+  const dateStr = activity.tss_activityDate
+    ? new Date(activity.tss_activityDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    : '';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-3 py-3 px-4 hover:bg-gray-50 rounded-md transition-colors text-left"
+    >
+      <div className="text-gray-400 flex-shrink-0">{icon}</div>
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        <span className="text-sm font-medium text-gray-900 truncate">
+          {activity.Title}
+        </span>
+        <span className="text-xs text-gray-500 truncate">
+          {activity.tss_activityType}
+          {companyName !== '—' && ` · ${companyName}`}
+          {activity.tss_owner && ` · ${activity.tss_owner}`}
+        </span>
+      </div>
+      <span className="text-xs text-gray-400 flex-shrink-0">{dateStr}</span>
+    </button>
+  );
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export function Dashboard() {
@@ -134,6 +184,7 @@ export function Dashboard() {
   const contacts = useContacts();
   const opportunities = useOpportunities();
   const pipeline = useOpportunitiesByStage();
+  const recentActivities = useRecentActivities(8);
   const { companyMap, resolve } = useLookupMaps();
 
   // Derive stats from pipeline data
@@ -308,6 +359,48 @@ export function Dashboard() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Calendar — Upcoming Meetings */}
+      <CalendarView />
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h3 className="text-base font-semibold text-gray-900">Recent Activity</h3>
+          <p className="text-xs text-gray-400 mt-0.5">Latest logged interactions</p>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {recentActivities.isLoading ? (
+            <div className="px-6 py-8 text-center text-sm text-gray-400">
+              Loading activities...
+            </div>
+          ) : !recentActivities.data || recentActivities.data.length === 0 ? (
+            <div className="px-6 py-8 text-center text-sm text-gray-400">
+              No activities logged yet. Start by logging a call or meeting.
+            </div>
+          ) : (
+            recentActivities.data.map((activity) => (
+              <RecentActivityRow
+                key={activity.id}
+                activity={activity}
+                companyName={resolve(activity.tss_companyId?.LookupId, companyMap)}
+                onClick={() => navigate(`/activities/${activity.id}`)}
+              />
+            ))
+          )}
+        </div>
+        {(recentActivities.data?.length ?? 0) > 0 && (
+          <div className="px-6 py-3 border-t border-gray-100">
+            <Button
+              appearance="transparent"
+              size="small"
+              onClick={() => navigate('/activities')}
+            >
+              View all activities
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
