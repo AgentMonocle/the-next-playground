@@ -18,7 +18,7 @@ export { OPPORTUNITY_STAGES, CLOSE_STATUSES, PURSUIT_DECISIONS, STAGE_COLORS, op
 export type { InternalTeamMember, TeamRole, InternalTeamFormData } from './internalTeam.js';
 export { TEAM_ROLES, internalTeamFormSchema } from './internalTeam.js';
 
-export type { BasinRegion, CompanyBasin, ContactBasin, OpportunityBasin, BasinRegionFormData } from './basinRegion.js';
+export type { BasinRegion, BasinRegionCountry, CompanyBasin, ContactBasin, OpportunityBasin, BasinRegionFormData } from './basinRegion.js';
 export { basinRegionFormSchema } from './basinRegion.js';
 
 // ─── Shared Types ───────────────────────────────────────────────────────────

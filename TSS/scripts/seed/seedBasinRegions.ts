@@ -1,8 +1,11 @@
 #!/usr/bin/env tsx
 /**
- * Seed TSS_BasinRegion list with basin/region reference data.
+ * Seed TSS_BasinRegion list with basin/region reference data,
+ * then create TSS_BasinRegionCountry junction records for the
+ * one-to-many Basin ↔ Country relationship.
  *
- * Idempotent: skips basins that already exist (matched by tss_basinCode).
+ * Idempotent: skips basins that already exist (matched by tss_basinCode),
+ * and skips junction records that already exist.
  *
  * Usage:
  *   cd TSS/scripts
@@ -16,22 +19,22 @@ import {
   getSiteId,
   getAllListItems,
   batchCreateItems,
-  findItemByField,
 } from '../lib/graphAdmin.js';
 
-const LIST_NAME = 'TSS_BasinRegion';
+const BASIN_LIST = 'TSS_BasinRegion';
 const COUNTRY_LIST = 'TSS_Country';
+const JUNCTION_LIST = 'TSS_BasinRegionCountry';
 
 interface BasinRegionData {
   name: string;
   code: string;
-  countryCode: string | null;
+  countryCodes: string[];
   description: string;
 }
 
 async function main() {
-  console.log('🏔️  Seeding TSS_BasinRegion list');
-  console.log('================================\n');
+  console.log('🏔️  Seeding TSS_BasinRegion + TSS_BasinRegionCountry');
+  console.log('=====================================================\n');
 
   // Load seed data
   const __filename = fileURLToPath(import.meta.url);
@@ -44,18 +47,45 @@ async function main() {
   const client = getAdminClient();
   const siteId = await getSiteId(client);
 
-  // Get existing basin items to avoid duplicates
-  const existing = await getAllListItems(client, siteId, LIST_NAME);
-  const existingCodes = new Set<string>();
+  // ─── Step 1: Seed basin records ──────────────────────────────────────────
+
+  const existing = await getAllListItems(client, siteId, BASIN_LIST);
+  const existingCodes = new Map<string, number>();
   for (const item of existing) {
     const fields = item.fields as Record<string, unknown> | undefined;
     if (fields?.tss_basinCode) {
-      existingCodes.add(fields.tss_basinCode as string);
+      existingCodes.set(fields.tss_basinCode as string, Number(item.id));
     }
   }
   console.log(`  Found ${existingCodes.size} existing basins in SharePoint`);
 
-  // Build country lookup map: countryCode → SharePoint item ID
+  const newBasins = basins.filter((b) => !existingCodes.has(b.code));
+  if (newBasins.length > 0) {
+    console.log(`  Creating ${newBasins.length} new basin/regions...\n`);
+
+    const items = newBasins.map((b) => ({
+      Title: b.name,
+      tss_basinCode: b.code,
+      tss_description: b.description,
+      tss_isActive: true,
+    }));
+
+    await batchCreateItems(client, siteId, BASIN_LIST, items);
+
+    // Refresh existing basins to get IDs for newly created ones
+    const refreshed = await getAllListItems(client, siteId, BASIN_LIST);
+    for (const item of refreshed) {
+      const fields = item.fields as Record<string, unknown> | undefined;
+      if (fields?.tss_basinCode) {
+        existingCodes.set(fields.tss_basinCode as string, Number(item.id));
+      }
+    }
+  } else {
+    console.log('  ✅ All basin/regions already exist');
+  }
+
+  // ─── Step 2: Build country lookup ────────────────────────────────────────
+
   const countries = await getAllListItems(client, siteId, COUNTRY_LIST);
   const countryCodeToId = new Map<string, number>();
   for (const item of countries) {
@@ -65,37 +95,53 @@ async function main() {
     }
   }
 
-  // Filter to only new basins
-  const newBasins = basins.filter((b) => !existingCodes.has(b.code));
-  if (newBasins.length === 0) {
-    console.log('\n  ✅ All basin/regions already exist — nothing to do');
-    return;
-  }
+  // ─── Step 3: Seed junction records ───────────────────────────────────────
 
-  console.log(`  Creating ${newBasins.length} new basin/regions...\n`);
-
-  // Map to SharePoint fields
-  const items = newBasins.map((b) => {
-    const fields: Record<string, unknown> = {
-      Title: b.name,
-      tss_basinCode: b.code,
-      tss_description: b.description,
-      tss_isActive: true,
-    };
-    if (b.countryCode) {
-      const countryId = countryCodeToId.get(b.countryCode);
-      if (countryId) {
-        fields.tss_countryIdLookupId = countryId;
+  const existingJunctions = await getAllListItems(client, siteId, JUNCTION_LIST);
+  const junctionSet = new Set<string>();
+  for (const item of existingJunctions) {
+    const fields = item.fields as Record<string, unknown> | undefined;
+    if (fields) {
+      const basinId = fields.tss_basinRegionIdLookupId;
+      const countryId = fields.tss_countryIdLookupId;
+      if (basinId && countryId) {
+        junctionSet.add(`${basinId}-${countryId}`);
       }
     }
-    return fields;
-  });
+  }
+  console.log(`  Found ${junctionSet.size} existing basin-country junctions`);
 
-  // Batch create
-  const created = await batchCreateItems(client, siteId, LIST_NAME, items);
+  const newJunctions: Record<string, unknown>[] = [];
+  for (const b of basins) {
+    const basinId = existingCodes.get(b.code);
+    if (!basinId) continue;
 
-  console.log(`\n================================`);
-  console.log(`✅ Seeded ${created} of ${newBasins.length} basin/regions`);
+    for (const cc of b.countryCodes) {
+      const countryId = countryCodeToId.get(cc);
+      if (!countryId) {
+        console.warn(`  ⚠ Country code "${cc}" not found for basin "${b.name}" — skipping`);
+        continue;
+      }
+      const key = `${basinId}-${countryId}`;
+      if (!junctionSet.has(key)) {
+        newJunctions.push({
+          Title: `${b.code}-${cc}`,
+          tss_basinRegionIdLookupId: basinId,
+          tss_countryIdLookupId: countryId,
+        });
+      }
+    }
+  }
+
+  if (newJunctions.length > 0) {
+    console.log(`  Creating ${newJunctions.length} basin-country junctions...\n`);
+    await batchCreateItems(client, siteId, JUNCTION_LIST, newJunctions);
+  } else {
+    console.log('  ✅ All basin-country junctions already exist');
+  }
+
+  console.log(`\n=====================================================`);
+  console.log(`✅ Basin/Region seeding complete`);
 }
 
 main().catch((err) => {

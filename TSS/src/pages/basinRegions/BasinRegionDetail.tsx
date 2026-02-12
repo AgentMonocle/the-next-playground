@@ -5,9 +5,9 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { useBasinRegion, useDeleteBasinRegion } from '@/hooks/useBasinRegions';
-import { useLookupMaps } from '@/hooks/useLookupMaps';
-import { useState } from 'react';
+import { CountryPicker } from '@/components/shared/CountryPicker';
+import { useBasinRegion, useDeleteBasinRegion, useBasinCountries, useAddBasinCountry, useRemoveBasinCountry } from '@/hooks/useBasinRegions';
+import { useState, useMemo } from 'react';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -27,7 +27,32 @@ export function BasinRegionDetail() {
   const basinId = id ? Number(id) : undefined;
   const { data: basin, isLoading, error, refetch } = useBasinRegion(basinId);
   const deleteBasin = useDeleteBasinRegion();
-  const { countryMap, resolve } = useLookupMaps();
+  const { data: basinCountries } = useBasinCountries(basinId);
+  const addCountry = useAddBasinCountry();
+  const removeCountry = useRemoveBasinCountry();
+
+  const selectedCountryIds = useMemo(
+    () => (basinCountries ?? []).map((bc) => bc.tss_countryId.LookupId),
+    [basinCountries]
+  );
+
+  const handleCountryChange = (newIds: number[]) => {
+    if (!basinId) return;
+    const currentIds = new Set(selectedCountryIds);
+    const targetIds = new Set(newIds);
+
+    for (const cid of newIds) {
+      if (!currentIds.has(cid)) {
+        addCountry.mutate({ basinId, countryId: cid });
+      }
+    }
+
+    for (const bc of basinCountries ?? []) {
+      if (!targetIds.has(bc.tss_countryId.LookupId)) {
+        removeCountry.mutate({ junctionId: bc.id, basinId });
+      }
+    }
+  };
 
   if (isLoading) return <LoadingState message="Loading basin/region..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -73,9 +98,17 @@ export function BasinRegionDetail() {
         <dl>
           <InfoRow label="Name" value={basin.Title} />
           <InfoRow label="Code" value={basin.tss_basinCode} />
-          <InfoRow label="Country" value={resolve(basin.tss_countryId?.LookupId, countryMap)} />
           <InfoRow label="Description" value={basin.tss_description} />
         </dl>
+      </div>
+
+      {/* Countries (one-to-many via junction) */}
+      <div className="bg-white rounded-lg border p-6">
+        <h3 className="font-semibold text-gray-900 mb-3">Countries</h3>
+        <CountryPicker
+          selectedIds={selectedCountryIds}
+          onChange={handleCountryChange}
+        />
       </div>
 
       <ConfirmDialog

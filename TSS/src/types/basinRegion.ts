@@ -7,7 +7,7 @@ export interface BasinRegion {
   id: number;
   Title: string;                    // Basin/region name (e.g., "Permian")
   tss_basinCode: string;            // Short code (e.g., "PERM")
-  tss_countryId?: LookupField;      // 1:1 relationship with Country
+  tss_countryId?: LookupField;      // Legacy 1:1 column (use junction now)
   tss_description?: string;
   tss_isActive: boolean;
   // SharePoint metadata
@@ -16,6 +16,13 @@ export interface BasinRegion {
 }
 
 // ─── Junction Types ─────────────────────────────────────────────────────────
+
+export interface BasinRegionCountry {
+  id: number;
+  Title: string;
+  tss_basinRegionId: LookupField;
+  tss_countryId: LookupField;
+}
 
 export interface CompanyBasin {
   id: number;
@@ -47,7 +54,6 @@ export const basinRegionFormSchema = z.object({
     .min(2, 'Code must be 2-6 characters')
     .max(6, 'Code must be 2-6 characters')
     .regex(/^[A-Z0-9]+$/, 'Code must be uppercase letters/numbers'),
-  tss_countryId: z.number().optional(),
   tss_description: z.string().optional(),
   tss_isActive: z.boolean().default(true),
 });

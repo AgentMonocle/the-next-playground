@@ -25,6 +25,7 @@ import { basinRegionList } from './lists/basinRegion.js';
 import { companyBasinList } from './lists/companyBasin.js';
 import { contactBasinList } from './lists/contactBasin.js';
 import { opportunityBasinList } from './lists/opportunityBasin.js';
+import { basinRegionCountryList } from './lists/basinRegionCountry.js';
 
 async function main() {
   console.log('🚀 TSS SharePoint Provisioning');
@@ -46,13 +47,14 @@ async function main() {
     productList,            // No lookups
     internalTeamList,       // No lookups
     sequenceList,           // No lookups
-    basinRegionList,        // Lookups: Country
-    companyList,            // Lookups: Country, self-ref
-    contactList,            // Lookups: Company
-    opportunityList,        // Lookups: Company, Contact, self-ref
-    companyBasinList,       // Lookups: Company, BasinRegion
-    contactBasinList,       // Lookups: Contact, BasinRegion
-    opportunityBasinList,   // Lookups: Opportunity, BasinRegion
+    basinRegionList,            // Lookups: Country (legacy column, unused)
+    companyList,                // Lookups: Country, self-ref
+    contactList,                // Lookups: Company
+    opportunityList,            // Lookups: Company, Contact, self-ref
+    basinRegionCountryList,     // Lookups: BasinRegion, Country
+    companyBasinList,           // Lookups: Company, BasinRegion
+    contactBasinList,           // Lookups: Contact, BasinRegion
+    opportunityBasinList,       // Lookups: Opportunity, BasinRegion
   ];
 
   for (const listDef of listsInOrder) {

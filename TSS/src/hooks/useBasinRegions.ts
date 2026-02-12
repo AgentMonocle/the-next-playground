@@ -15,6 +15,7 @@ import {
 import type {
   BasinRegion,
   BasinRegionFormData,
+  BasinRegionCountry,
   CompanyBasin,
   ContactBasin,
   OpportunityBasin,
@@ -36,6 +37,7 @@ export const basinRegionKeys = {
 };
 
 export const junctionKeys = {
+  basinCountries: (basinId: number) => ['basinCountries', basinId] as const,
   companyBasins: (companyId: number) => ['companyBasins', companyId] as const,
   contactBasins: (contactId: number) => ['contactBasins', contactId] as const,
   opportunityBasins: (oppId: number) => ['opportunityBasins', oppId] as const,
@@ -105,7 +107,6 @@ export function useCreateBasinRegion() {
         tss_basinCode: data.tss_basinCode,
         tss_description: data.tss_description,
         tss_isActive: data.tss_isActive ?? true,
-        ...setLookupField('tss_countryId', data.tss_countryId),
       };
 
       return createListItem<BasinRegion>(client, LIST_NAME, fields);
@@ -125,11 +126,6 @@ export function useUpdateBasinRegion() {
       const client = getGraphClient(instance);
 
       const fields: Record<string, unknown> = { ...data };
-      if ('tss_countryId' in data) {
-        delete fields.tss_countryId;
-        Object.assign(fields, setLookupField('tss_countryId', data.tss_countryId));
-      }
-
       await updateListItem(client, LIST_NAME, id, fields);
     },
     onSuccess: (_, { id }) => {
@@ -150,6 +146,61 @@ export function useDeleteBasinRegion() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: basinRegionKeys.all });
+    },
+  });
+}
+
+// ─── Junction Hooks: BasinRegion ↔ Country ──────────────────────────────────
+
+export function useBasinCountries(basinId: number | undefined) {
+  const { instance } = useMsal();
+
+  return useQuery({
+    queryKey: junctionKeys.basinCountries(basinId!),
+    queryFn: async () => {
+      const client = getGraphClient(instance);
+      const result = await getListItems<BasinRegionCountry>(client, 'TSS_BasinRegionCountry', {
+        filter: buildFilter([
+          { field: 'tss_basinRegionIdLookupId', operator: 'eq', value: basinId! },
+        ]),
+        top: 200,
+      });
+      return result.items;
+    },
+    enabled: basinId !== undefined,
+  });
+}
+
+export function useAddBasinCountry() {
+  const { instance } = useMsal();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ basinId, countryId }: { basinId: number; countryId: number }) => {
+      const client = getGraphClient(instance);
+      return createListItem<BasinRegionCountry>(client, 'TSS_BasinRegionCountry', {
+        Title: `${basinId}-${countryId}`,
+        ...setLookupField('tss_basinRegionId', basinId),
+        ...setLookupField('tss_countryId', countryId),
+      });
+    },
+    onSuccess: (_, { basinId }) => {
+      queryClient.invalidateQueries({ queryKey: junctionKeys.basinCountries(basinId) });
+    },
+  });
+}
+
+export function useRemoveBasinCountry() {
+  const { instance } = useMsal();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ junctionId }: { junctionId: number; basinId: number }) => {
+      const client = getGraphClient(instance);
+      await deleteListItem(client, 'TSS_BasinRegionCountry', junctionId);
+    },
+    onSuccess: (_, { basinId }) => {
+      queryClient.invalidateQueries({ queryKey: junctionKeys.basinCountries(basinId) });
     },
   });
 }

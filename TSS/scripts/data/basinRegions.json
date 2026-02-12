@@ -1,10 +1,11 @@
 [
-  { "name": "Permian", "code": "PERM", "countryCode": "US", "description": "Permian Basin — West Texas and southeastern New Mexico" },
-  { "name": "Eagle Ford", "code": "EF", "countryCode": "US", "description": "Eagle Ford Shale — South Texas" },
-  { "name": "DJ Basin", "code": "DJ", "countryCode": "US", "description": "Denver-Julesburg Basin — Colorado and Wyoming" },
-  { "name": "Bakken", "code": "BAK", "countryCode": "US", "description": "Bakken Formation — North Dakota and Montana" },
-  { "name": "GoM", "code": "GOM", "countryCode": "US", "description": "Gulf of Mexico — Deepwater and shelf operations" },
-  { "name": "Marcellus", "code": "MARC", "countryCode": "US", "description": "Marcellus Shale — Pennsylvania, West Virginia, Ohio" },
-  { "name": "International", "code": "INTL", "countryCode": null, "description": "International operations outside core US basins" },
-  { "name": "Other", "code": "OTH", "countryCode": null, "description": "Other basins/regions not listed" }
+  { "name": "Permian", "code": "PERM", "countryCodes": ["US"], "description": "Permian Basin — West Texas and southeastern New Mexico" },
+  { "name": "Eagle Ford", "code": "EF", "countryCodes": ["US"], "description": "Eagle Ford Shale — South Texas" },
+  { "name": "DJ Basin", "code": "DJ", "countryCodes": ["US"], "description": "Denver-Julesburg Basin — Colorado and Wyoming" },
+  { "name": "Bakken", "code": "BAK", "countryCodes": ["US", "CA"], "description": "Bakken Formation — North Dakota, Montana, Saskatchewan" },
+  { "name": "GoM", "code": "GOM", "countryCodes": ["US", "MX"], "description": "Gulf of Mexico — Deepwater and shelf operations (US and Mexico)" },
+  { "name": "Marcellus", "code": "MARC", "countryCodes": ["US"], "description": "Marcellus Shale — Pennsylvania, West Virginia, Ohio" },
+  { "name": "North Sea", "code": "NSEA", "countryCodes": ["GB", "NO", "DK", "NL"], "description": "North Sea — UK, Norway, Denmark, Netherlands" },
+  { "name": "International", "code": "INTL", "countryCodes": [], "description": "International operations outside core basins" },
+  { "name": "Other", "code": "OTH", "countryCodes": [], "description": "Other basins/regions not listed" }
 ]

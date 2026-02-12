@@ -4,14 +4,11 @@ import {
   Button,
   Input,
   Textarea,
-  Combobox,
-  Option,
 } from '@fluentui/react-components';
 import { Save24Regular, Dismiss24Regular } from '@fluentui/react-icons';
 import { FormField } from '@/components/shared/FormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useBasinRegion, useCreateBasinRegion, useUpdateBasinRegion } from '@/hooks/useBasinRegions';
-import { useCountries } from '@/hooks/useReferenceData';
 import { basinRegionFormSchema, type BasinRegionFormData } from '@/types';
 
 export function BasinRegionForm() {
@@ -21,7 +18,6 @@ export function BasinRegionForm() {
   const basinId = id ? Number(id) : undefined;
 
   const { data: existingBasin, isLoading: loadingBasin } = useBasinRegion(basinId);
-  const { data: countries } = useCountries();
   const createBasin = useCreateBasinRegion();
   const updateBasin = useUpdateBasinRegion();
 
@@ -37,7 +33,6 @@ export function BasinRegionForm() {
       setForm({
         Title: existingBasin.Title,
         tss_basinCode: existingBasin.tss_basinCode,
-        tss_countryId: existingBasin.tss_countryId?.LookupId,
         tss_description: existingBasin.tss_description ?? '',
         tss_isActive: existingBasin.tss_isActive,
       });
@@ -113,23 +108,6 @@ export function BasinRegionForm() {
           </FormField>
         </div>
 
-        <FormField label="Country" error={errors.tss_countryId}>
-          <Combobox
-            value={countries?.find((c) => c.id === form.tss_countryId)?.Title ?? ''}
-            onOptionSelect={(_, data) => {
-              const countryId = data.optionValue ? Number(data.optionValue) : undefined;
-              updateField('tss_countryId', countryId);
-            }}
-            freeform={false}
-            clearable
-            placeholder="Select country (optional)..."
-          >
-            {(countries ?? []).map((c) => (
-              <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
-            ))}
-          </Combobox>
-        </FormField>
-
         <FormField label="Description" error={errors.tss_description}>
           <Textarea
             value={form.tss_description ?? ''}
@@ -138,6 +116,12 @@ export function BasinRegionForm() {
             placeholder="Description of this basin/region..."
           />
         </FormField>
+
+        {!isEdit && (
+          <p className="text-xs text-gray-400">
+            Countries can be added from the basin/region detail page after creation.
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

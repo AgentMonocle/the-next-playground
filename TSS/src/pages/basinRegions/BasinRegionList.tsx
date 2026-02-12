@@ -17,7 +17,6 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useBasinRegions } from '@/hooks/useBasinRegions';
-import { useLookupMaps } from '@/hooks/useLookupMaps';
 import type { BasinRegion } from '@/types';
 
 export function BasinRegionList() {
@@ -25,7 +24,6 @@ export function BasinRegionList() {
   const [search, setSearch] = useState('');
 
   const { data: basins, isLoading, error, refetch } = useBasinRegions({ search: search || undefined });
-  const { countryMap, resolve } = useLookupMaps();
 
   const columns: TableColumnDefinition<BasinRegion>[] = useMemo(() => [
     createTableColumn<BasinRegion>({
@@ -43,11 +41,6 @@ export function BasinRegionList() {
       renderCell: (item) => (
         <span className="font-mono text-sm text-gray-600">{item.tss_basinCode}</span>
       ),
-    }),
-    createTableColumn<BasinRegion>({
-      columnId: 'country',
-      renderHeaderCell: () => 'Country',
-      renderCell: (item) => resolve(item.tss_countryId?.LookupId, countryMap),
     }),
     createTableColumn<BasinRegion>({
       columnId: 'description',
@@ -68,7 +61,7 @@ export function BasinRegionList() {
         </Badge>
       ),
     }),
-  ], [countryMap]);
+  ], []);
 
   if (isLoading) return <LoadingState message="Loading basin/regions..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
