@@ -7,6 +7,9 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { useOpportunity, useUpdateOpportunity } from '@/hooks/useOpportunities';
 import { useOpportunityBasins, useAddOpportunityBasin, useRemoveOpportunityBasin } from '@/hooks/useBasinRegions';
 import { BasinPicker } from '@/components/shared/BasinPicker';
+import { ActivityTimeline } from '@/components/shared/ActivityTimeline';
+import { QuickActions } from '@/components/shared/QuickActions';
+import { useActivitiesByOpportunity } from '@/hooks/useActivities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useMemo } from 'react';
 import {
@@ -57,6 +60,7 @@ export function OpportunityDetail() {
   const { data: oppBasins } = useOpportunityBasins(opportunityId);
   const addBasin = useAddOpportunityBasin();
   const removeBasin = useRemoveOpportunityBasin();
+  const { data: oppActivities, isLoading: loadingActivities } = useActivitiesByOpportunity(opportunityId);
   const { companyMap, contactMap, resolve } = useLookupMaps();
 
   const selectedBasinIds = useMemo(
@@ -269,6 +273,21 @@ export function OpportunityDetail() {
           <InfoRow label="Owner" value={opportunity.tss_owner} />
         </dl>
       </div>
+
+      {/* Quick Actions */}
+      <QuickActions
+        opportunityId={opportunityId}
+        companyId={opportunity.tss_companyId?.LookupId}
+      />
+
+      {/* Activity History */}
+      <ActivityTimeline
+        activities={oppActivities}
+        isLoading={loadingActivities}
+        entityType="opportunity"
+        entityId={opportunityId}
+        extraParams={opportunity.tss_companyId?.LookupId ? { companyId: String(opportunity.tss_companyId.LookupId) } : undefined}
+      />
 
       {/* Notes */}
       {opportunity.tss_notes && (

@@ -14,6 +14,8 @@ import {
   Briefcase24Filled,
   Board24Regular,
   Board24Filled,
+  ClipboardTask24Regular,
+  ClipboardTask24Filled,
   Globe24Regular,
   Globe24Filled,
   PanelLeftContract24Regular,
@@ -52,6 +54,12 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Opportunities',
     icon: <Briefcase24Regular />,
     iconFilled: <Briefcase24Filled />,
+  },
+  {
+    path: '/activities',
+    label: 'Activities',
+    icon: <ClipboardTask24Regular />,
+    iconFilled: <ClipboardTask24Filled />,
   },
   {
     path: '/pipeline',

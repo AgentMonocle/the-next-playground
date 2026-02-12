@@ -21,6 +21,9 @@ export { TEAM_ROLES, internalTeamFormSchema } from './internalTeam.js';
 export type { BasinRegion, BasinRegionCountry, CompanyBasin, ContactBasin, OpportunityBasin, BasinRegionFormData } from './basinRegion.js';
 export { basinRegionFormSchema } from './basinRegion.js';
 
+export type { Activity, ActivityType, ActivityDirection, ActivitySource, ActivityFormData } from './activity.js';
+export { ACTIVITY_TYPES, ACTIVITY_DIRECTIONS, ACTIVITY_SOURCES, activityFormSchema } from './activity.js';
+
 // ─── Shared Types ───────────────────────────────────────────────────────────
 
 /** Base fields present on every SharePoint list item */

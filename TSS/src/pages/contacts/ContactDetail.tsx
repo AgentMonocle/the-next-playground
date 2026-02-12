@@ -8,6 +8,9 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useContact, useDeleteContact } from '@/hooks/useContacts';
 import { useContactBasins, useAddContactBasin, useRemoveContactBasin } from '@/hooks/useBasinRegions';
 import { BasinPicker } from '@/components/shared/BasinPicker';
+import { ActivityTimeline } from '@/components/shared/ActivityTimeline';
+import { QuickActions } from '@/components/shared/QuickActions';
+import { useActivitiesByContact } from '@/hooks/useActivities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useState, useMemo } from 'react';
 
@@ -32,6 +35,7 @@ export function ContactDetail() {
   const { data: contactBasins } = useContactBasins(contactId);
   const addBasin = useAddContactBasin();
   const removeBasin = useRemoveContactBasin();
+  const { data: contactActivities, isLoading: loadingActivities } = useActivitiesByContact(contactId);
   const { companyMap, resolve } = useLookupMaps();
 
   const selectedBasinIds = useMemo(
@@ -152,6 +156,21 @@ export function ContactDetail() {
           </Link>
         </div>
       )}
+
+      {/* Quick Actions */}
+      <QuickActions
+        contactId={contactId}
+        companyId={contact.tss_companyId?.LookupId}
+      />
+
+      {/* Activity History */}
+      <ActivityTimeline
+        activities={contactActivities}
+        isLoading={loadingActivities}
+        entityType="contact"
+        entityId={contactId}
+        extraParams={contact.tss_companyId?.LookupId ? { companyId: String(contact.tss_companyId.LookupId) } : undefined}
+      />
 
       {/* Notes */}
       {contact.tss_notes && (

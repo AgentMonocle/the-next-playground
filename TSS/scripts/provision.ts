@@ -26,6 +26,7 @@ import { companyBasinList } from './lists/companyBasin.js';
 import { contactBasinList } from './lists/contactBasin.js';
 import { opportunityBasinList } from './lists/opportunityBasin.js';
 import { basinRegionCountryList } from './lists/basinRegionCountry.js';
+import { activityList } from './lists/activity.js';
 
 async function main() {
   console.log('🚀 TSS SharePoint Provisioning');
@@ -51,6 +52,7 @@ async function main() {
     companyList,                // Lookups: Country, self-ref
     contactList,                // Lookups: Company
     opportunityList,            // Lookups: Company, Contact, self-ref
+    activityList,               // Lookups: Company, Contact, Opportunity
     basinRegionCountryList,     // Lookups: BasinRegion, Country
     companyBasinList,           // Lookups: Company, BasinRegion
     contactBasinList,           // Lookups: Contact, BasinRegion

@@ -12,6 +12,9 @@ import { OpportunityList } from '@/pages/opportunities/OpportunityList';
 import { OpportunityDetail } from '@/pages/opportunities/OpportunityDetail';
 import { OpportunityForm } from '@/pages/opportunities/OpportunityForm';
 import { Pipeline } from '@/pages/Pipeline';
+import { ActivityList } from '@/pages/activities/ActivityList';
+import { ActivityDetail } from '@/pages/activities/ActivityDetail';
+import { ActivityForm } from '@/pages/activities/ActivityForm';
 import { BasinRegionList } from '@/pages/basinRegions/BasinRegionList';
 import { BasinRegionDetail } from '@/pages/basinRegions/BasinRegionDetail';
 import { BasinRegionForm } from '@/pages/basinRegions/BasinRegionForm';
@@ -37,6 +40,11 @@ export const router = createBrowserRouter([
       { path: 'opportunities/new', element: <OpportunityForm /> },
       { path: 'opportunities/:id', element: <OpportunityDetail /> },
       { path: 'opportunities/:id/edit', element: <OpportunityForm /> },
+      // Activities
+      { path: 'activities', element: <ActivityList /> },
+      { path: 'activities/new', element: <ActivityForm /> },
+      { path: 'activities/:id', element: <ActivityDetail /> },
+      { path: 'activities/:id/edit', element: <ActivityForm /> },
       // Pipeline
       { path: 'pipeline', element: <Pipeline /> },
       // Basin/Regions
