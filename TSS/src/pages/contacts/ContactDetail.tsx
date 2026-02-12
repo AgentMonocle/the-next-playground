@@ -10,6 +10,7 @@ import { useContactBasins, useAddContactBasin, useRemoveContactBasin } from '@/h
 import { BasinPicker } from '@/components/shared/BasinPicker';
 import { ActivityTimeline } from '@/components/shared/ActivityTimeline';
 import { QuickActions } from '@/components/shared/QuickActions';
+import { EmailPanel } from '@/components/email/EmailPanel';
 import { useActivitiesByContact } from '@/hooks/useActivities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useState, useMemo } from 'react';
@@ -156,6 +157,14 @@ export function ContactDetail() {
           </Link>
         </div>
       )}
+
+      {/* Emails */}
+      <EmailPanel
+        contactEmail={contact.tss_email}
+        contactName={contact.Title}
+        companyId={contact.tss_companyId?.LookupId}
+        contactId={contactId}
+      />
 
       {/* Quick Actions */}
       <QuickActions

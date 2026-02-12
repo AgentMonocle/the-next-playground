@@ -10,7 +10,12 @@ export function getGraphClient(msalInstance: IPublicClientApplication): Client {
         if (!account) throw new Error('No active account');
 
         const response = await msalInstance.acquireTokenSilent({
-          scopes: [...graphScopes.sharePoint, ...graphScopes.userProfile],
+          scopes: [
+            ...graphScopes.sharePoint,
+            ...graphScopes.userProfile,
+            ...graphScopes.mail,
+            ...graphScopes.calendar,
+          ],
           account,
         });
 

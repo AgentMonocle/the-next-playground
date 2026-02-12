@@ -17,6 +17,7 @@ import {
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useContacts } from '@/hooks/useContacts';
 import { useOpportunities, useOpportunitiesByStage } from '@/hooks/useOpportunities';
@@ -359,6 +360,9 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Calendar — Upcoming Meetings */}
+      <CalendarView />
 
       {/* Recent Activity */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
