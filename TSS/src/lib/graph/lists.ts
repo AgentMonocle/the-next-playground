@@ -195,6 +195,21 @@ export async function softDeleteListItem(
   await updateListItem(client, listName, itemId, { tss_isActive: false });
 }
 
+/**
+ * Hard-delete a list item (permanently removes the record).
+ * Use for junction/association records that don't need soft-delete.
+ */
+export async function deleteListItem(
+  client: Client,
+  listName: string,
+  itemId: number
+): Promise<void> {
+  const siteId = await getSiteId(client);
+  await client
+    .api(`/sites/${siteId}/lists/${listName}/items/${itemId}`)
+    .delete();
+}
+
 // ─── OData Filter Helpers ───────────────────────────────────────────────────
 
 /**

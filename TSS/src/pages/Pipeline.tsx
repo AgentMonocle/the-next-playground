@@ -8,7 +8,8 @@ import { PipelineBoard } from '@/components/pipeline/PipelineBoard';
 import { useOpportunitiesByStage, useUpdateOpportunity } from '@/hooks/useOpportunities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import { useUIStore } from '@/stores/uiStore';
-import { OPPORTUNITY_STAGES, BASINS, PRODUCT_LINES } from '@/types';
+import { OPPORTUNITY_STAGES, PRODUCT_LINES } from '@/types';
+import { useBasinRegions } from '@/hooks/useBasinRegions';
 import type { OpportunityStage } from '@/types';
 
 export function Pipeline() {
@@ -16,6 +17,7 @@ export function Pipeline() {
   const updateOpportunity = useUpdateOpportunity();
   const { companyMap } = useLookupMaps();
   const { pipelineFilters, setPipelineFilters, clearPipelineFilters } = useUIStore();
+  const { data: basinRegions } = useBasinRegions({ isActive: true });
 
   const handleStageChange = useCallback(
     async (opportunityId: number, newStage: OpportunityStage) => {
@@ -83,8 +85,8 @@ export function Pipeline() {
           clearable
           className="w-44"
         >
-          {BASINS.map((b) => (
-            <Option key={b} value={b}>{b}</Option>
+          {(basinRegions ?? []).map((b) => (
+            <Option key={b.id} value={b.Title}>{b.Title}</Option>
           ))}
         </Dropdown>
         {(pipelineFilters.productLine || pipelineFilters.basin) && (

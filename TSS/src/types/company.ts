@@ -21,20 +21,8 @@ export const COMPANY_TYPES = [
   'Distributor',
 ] as const;
 
-export const BASINS = [
-  'Permian',
-  'Eagle Ford',
-  'DJ Basin',
-  'Bakken',
-  'GoM',
-  'Marcellus',
-  'International',
-  'Other',
-] as const;
-
 export type Industry = (typeof INDUSTRIES)[number];
 export type CompanyType = (typeof COMPANY_TYPES)[number];
-export type Basin = (typeof BASINS)[number];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -57,7 +45,7 @@ export interface Company {
   tss_address?: string;
   tss_owner?: { LookupId: number; LookupValue: string; Email?: string };
   tss_companyType?: CompanyType;
-  tss_basin?: Basin;
+  tss_basin?: string;              // Legacy Choice field (use junction list now)
   tss_notes?: string;
   tss_isActive: boolean;
   // SharePoint metadata
@@ -82,7 +70,6 @@ export const companyFormSchema = z.object({
   tss_phone: z.string().optional(),
   tss_address: z.string().optional(),
   tss_companyType: z.enum(COMPANY_TYPES).optional(),
-  tss_basin: z.enum(BASINS).optional(),
   tss_notes: z.string().optional(),
   tss_isActive: z.boolean().default(true),
 });

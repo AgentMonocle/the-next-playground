@@ -5,7 +5,10 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { useOpportunity, useUpdateOpportunity } from '@/hooks/useOpportunities';
+import { useOpportunityBasins, useAddOpportunityBasin, useRemoveOpportunityBasin } from '@/hooks/useBasinRegions';
+import { BasinPicker } from '@/components/shared/BasinPicker';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
+import { useMemo } from 'react';
 import {
   OPPORTUNITY_STAGES,
   STAGE_COLORS,
@@ -51,7 +54,33 @@ export function OpportunityDetail() {
   const opportunityId = id ? Number(id) : undefined;
   const { data: opportunity, isLoading, error, refetch } = useOpportunity(opportunityId);
   const updateOpportunity = useUpdateOpportunity();
+  const { data: oppBasins } = useOpportunityBasins(opportunityId);
+  const addBasin = useAddOpportunityBasin();
+  const removeBasin = useRemoveOpportunityBasin();
   const { companyMap, contactMap, resolve } = useLookupMaps();
+
+  const selectedBasinIds = useMemo(
+    () => (oppBasins ?? []).map((ob) => ob.tss_basinRegionId.LookupId),
+    [oppBasins]
+  );
+
+  const handleBasinChange = (newIds: number[]) => {
+    if (!opportunityId) return;
+    const currentIds = new Set(selectedBasinIds);
+    const targetIds = new Set(newIds);
+
+    for (const bid of newIds) {
+      if (!currentIds.has(bid)) {
+        addBasin.mutate({ opportunityId, basinRegionId: bid });
+      }
+    }
+
+    for (const ob of oppBasins ?? []) {
+      if (!targetIds.has(ob.tss_basinRegionId.LookupId)) {
+        removeBasin.mutate({ junctionId: ob.id, opportunityId });
+      }
+    }
+  };
 
   if (isLoading) return <LoadingState message="Loading opportunity..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -114,7 +143,6 @@ export function OpportunityDetail() {
             value={opportunity.tss_probability != null ? `${opportunity.tss_probability}%` : null}
           />
           <InfoRow label="Product Line" value={opportunity.tss_productLine} />
-          <InfoRow label="Basin" value={opportunity.tss_basin} />
           <InfoRow label="PO Number" value={opportunity.tss_poNumber} />
           {opportunity.tss_isTaxExempt != null && (
             <div className="flex gap-4 py-1.5">
@@ -130,6 +158,15 @@ export function OpportunityDetail() {
             </div>
           )}
         </dl>
+      </div>
+
+      {/* Basin/Regions */}
+      <div className="bg-white rounded-lg border p-6">
+        <h3 className="font-semibold text-gray-900 mb-3">Basin/Regions</h3>
+        <BasinPicker
+          selectedIds={selectedBasinIds}
+          onChange={handleBasinChange}
+        />
       </div>
 
       {/* Dates */}

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMsal } from '@azure/msal-react';
 import { getGraphClient } from '@/lib/graph/graphClient';
 import { getAllListItems } from '@/lib/graph/lists';
-import type { Company, Contact, Country } from '@/types';
+import type { Company, Contact, Country, BasinRegion } from '@/types';
 
 const STALE_TIME = 60 * 60 * 1000; // 1 hour
 
@@ -60,10 +60,26 @@ export function useLookupMaps() {
     return map;
   }, [contacts]);
 
+  const { data: basinRegions } = useQuery({
+    queryKey: ['lookup', 'basinRegions'],
+    queryFn: async () => {
+      const client = getGraphClient(instance);
+      return getAllListItems<BasinRegion>(client, 'TSS_BasinRegion');
+    },
+    staleTime: STALE_TIME,
+  });
+
+  const basinRegionMap = useMemo(() => {
+    const map = new Map<number, string>();
+    if (basinRegions) for (const b of basinRegions) map.set(b.id, b.Title);
+    return map;
+  }, [basinRegions]);
+
   return {
     countryMap,
     companyMap,
     contactMap,
+    basinRegionMap,
     resolve: (lookupId: number | undefined, map: Map<number, string>): string =>
       (lookupId && map.get(lookupId)) || '—',
   };

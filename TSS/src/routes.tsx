@@ -12,6 +12,9 @@ import { OpportunityList } from '@/pages/opportunities/OpportunityList';
 import { OpportunityDetail } from '@/pages/opportunities/OpportunityDetail';
 import { OpportunityForm } from '@/pages/opportunities/OpportunityForm';
 import { Pipeline } from '@/pages/Pipeline';
+import { BasinRegionList } from '@/pages/basinRegions/BasinRegionList';
+import { BasinRegionDetail } from '@/pages/basinRegions/BasinRegionDetail';
+import { BasinRegionForm } from '@/pages/basinRegions/BasinRegionForm';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +39,11 @@ export const router = createBrowserRouter([
       { path: 'opportunities/:id/edit', element: <OpportunityForm /> },
       // Pipeline
       { path: 'pipeline', element: <Pipeline /> },
+      // Basin/Regions
+      { path: 'basin-regions', element: <BasinRegionList /> },
+      { path: 'basin-regions/new', element: <BasinRegionForm /> },
+      { path: 'basin-regions/:id', element: <BasinRegionDetail /> },
+      { path: 'basin-regions/:id/edit', element: <BasinRegionForm /> },
       // Catch-all
       { path: '*', element: <Navigate to="/" replace /> },
     ],

@@ -135,7 +135,6 @@ export function useCreateCompany() {
         tss_phone: data.tss_phone,
         tss_address: data.tss_address,
         tss_companyType: data.tss_companyType,
-        tss_basin: data.tss_basin,
         tss_notes: data.tss_notes,
         tss_isActive: data.tss_isActive ?? true,
         ...setLookupField('tss_countryId', data.tss_countryId),

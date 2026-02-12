@@ -169,7 +169,6 @@ export function useCreateOpportunity() {
         tss_deliveryDate: data.tss_deliveryDate,
         tss_closeDate: data.tss_closeDate,
         tss_productLine: data.tss_productLine,
-        tss_basin: data.tss_basin,
         tss_isRelated: data.tss_isRelated,
         tss_pursuitDecision: data.tss_pursuitDecision,
         tss_pursuitRationale: data.tss_pursuitRationale,

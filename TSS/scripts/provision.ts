@@ -21,6 +21,10 @@ import { contactList } from './lists/contact.js';
 import { internalTeamList } from './lists/internalTeam.js';
 import { opportunityList } from './lists/opportunity.js';
 import { sequenceList } from './lists/sequence.js';
+import { basinRegionList } from './lists/basinRegion.js';
+import { companyBasinList } from './lists/companyBasin.js';
+import { contactBasinList } from './lists/contactBasin.js';
+import { opportunityBasinList } from './lists/opportunityBasin.js';
 
 async function main() {
   console.log('🚀 TSS SharePoint Provisioning');
@@ -36,14 +40,19 @@ async function main() {
   // 1. Reference data lists (no lookups to other TSS lists)
   // 2. Core entity lists (lookups to reference data)
   // 3. Complex entity lists (lookups to core entities)
+  // 4. Junction lists (lookups to core entities + reference data)
   const listsInOrder: ListDefinition[] = [
-    countryList,        // No lookups
-    productList,        // No lookups
-    internalTeamList,   // No lookups
-    sequenceList,       // No lookups
-    companyList,        // Lookups: Country, self-ref
-    contactList,        // Lookups: Company
-    opportunityList,    // Lookups: Company, Contact, self-ref
+    countryList,            // No lookups
+    productList,            // No lookups
+    internalTeamList,       // No lookups
+    sequenceList,           // No lookups
+    basinRegionList,        // Lookups: Country
+    companyList,            // Lookups: Country, self-ref
+    contactList,            // Lookups: Company
+    opportunityList,        // Lookups: Company, Contact, self-ref
+    companyBasinList,       // Lookups: Company, BasinRegion
+    contactBasinList,       // Lookups: Contact, BasinRegion
+    opportunityBasinList,   // Lookups: Opportunity, BasinRegion
   ];
 
   for (const listDef of listsInOrder) {

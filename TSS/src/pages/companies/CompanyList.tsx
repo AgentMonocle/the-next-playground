@@ -20,8 +20,9 @@ import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useCompanies, type UseCompaniesOptions } from '@/hooks/useCompanies';
 import { useCountries } from '@/hooks/useReferenceData';
+import { useBasinRegions } from '@/hooks/useBasinRegions';
 import type { Company } from '@/types';
-import { INDUSTRIES, COMPANY_TYPES, BASINS } from '@/types';
+import { INDUSTRIES, COMPANY_TYPES } from '@/types';
 
 export function CompanyList() {
   const navigate = useNavigate();
@@ -42,6 +43,7 @@ export function CompanyList() {
 
   const { data: companies, isLoading, error, refetch } = useCompanies(options);
   const { data: countries } = useCountries();
+  const { data: basinRegions } = useBasinRegions({ isActive: true });
 
   // Build country lookup map: SharePoint ID → country name
   const countryMap = useMemo(() => {
@@ -158,8 +160,8 @@ export function CompanyList() {
           clearable
           className="w-44"
         >
-          {BASINS.map((b) => (
-            <Option key={b} value={b}>{b}</Option>
+          {(basinRegions ?? []).map((b) => (
+            <Option key={b.id} value={b.Title}>{b.Title}</Option>
           ))}
         </Dropdown>
       </div>

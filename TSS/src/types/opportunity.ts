@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { LookupField, Basin } from './company.js';
+import type { LookupField } from './company.js';
 import type { ProductLine } from './product.js';
 
 // ─── Choice Constants ───────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ export interface Opportunity {
   tss_closeDate?: string;
   tss_owner?: string;  // Text field (changed from Person type)
   tss_productLine?: ProductLine;
-  tss_basin?: Basin;
+  tss_basin?: string;                      // Legacy Choice field (use junction list now)
   tss_isRelated?: boolean;
   tss_relatedOpportunityId?: LookupField;
   tss_pursuitDecision?: PursuitDecision;
@@ -83,16 +83,6 @@ export const opportunityFormSchema = z.object({
     'Green Energy',
     'Engineering Service',
     'Testing Service',
-  ] as const).optional(),
-  tss_basin: z.enum([
-    'Permian',
-    'Eagle Ford',
-    'DJ Basin',
-    'Bakken',
-    'GoM',
-    'Marcellus',
-    'International',
-    'Other',
   ] as const).optional(),
   tss_isRelated: z.boolean().default(false),
   tss_relatedOpportunityId: z.number().optional(),

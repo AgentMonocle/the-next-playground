@@ -14,6 +14,8 @@ import {
   Briefcase24Filled,
   Board24Regular,
   Board24Filled,
+  Globe24Regular,
+  Globe24Filled,
   PanelLeftContract24Regular,
   PanelLeftExpand24Regular,
 } from '@fluentui/react-icons';
@@ -56,6 +58,12 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Pipeline',
     icon: <Board24Regular />,
     iconFilled: <Board24Filled />,
+  },
+  {
+    path: '/basin-regions',
+    label: 'Basin/Regions',
+    icon: <Globe24Regular />,
+    iconFilled: <Globe24Filled />,
   },
 ];
 

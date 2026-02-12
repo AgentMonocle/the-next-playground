@@ -21,7 +21,8 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { useOpportunities, type UseOpportunitiesOptions } from '@/hooks/useOpportunities';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
 import type { Opportunity } from '@/types';
-import { OPPORTUNITY_STAGES, STAGE_COLORS, PRODUCT_LINES, BASINS } from '@/types';
+import { OPPORTUNITY_STAGES, STAGE_COLORS, PRODUCT_LINES } from '@/types';
+import { useBasinRegions } from '@/hooks/useBasinRegions';
 
 type BadgeColor = 'informative' | 'warning' | 'severe' | 'important' | 'success' | 'subtle';
 
@@ -50,6 +51,7 @@ export function OpportunityList() {
 
   const { data: opportunities, isLoading, error, refetch } = useOpportunities(options);
   const { companyMap, resolve } = useLookupMaps();
+  const { data: basinRegions } = useBasinRegions({ isActive: true });
 
   const columns: TableColumnDefinition<Opportunity>[] = useMemo(() => [
     createTableColumn<Opportunity>({
@@ -154,8 +156,8 @@ export function OpportunityList() {
           clearable
           className="w-44"
         >
-          {BASINS.map((b) => (
-            <Option key={b} value={b}>{b}</Option>
+          {(basinRegions ?? []).map((b) => (
+            <Option key={b.id} value={b.Title}>{b.Title}</Option>
           ))}
         </Dropdown>
       </div>

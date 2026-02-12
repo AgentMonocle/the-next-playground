@@ -20,7 +20,6 @@ import {
   OPPORTUNITY_STAGES,
   CLOSE_STATUSES,
   PURSUIT_DECISIONS,
-  BASINS,
   PRODUCT_LINES,
   type OpportunityFormData,
 } from '@/types';
@@ -62,7 +61,6 @@ export function OpportunityForm() {
         tss_deliveryDate: existingOpp.tss_deliveryDate ?? '',
         tss_closeDate: existingOpp.tss_closeDate ?? '',
         tss_productLine: existingOpp.tss_productLine as OpportunityFormData['tss_productLine'],
-        tss_basin: existingOpp.tss_basin,
         tss_isRelated: existingOpp.tss_isRelated ?? false,
         tss_relatedOpportunityId: existingOpp.tss_relatedOpportunityId?.LookupId,
         tss_pursuitDecision: existingOpp.tss_pursuitDecision,
@@ -227,20 +225,6 @@ export function OpportunityForm() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField label="Basin/Region" error={errors.tss_basin}>
-            <Dropdown
-              value={form.tss_basin ?? ''}
-              onOptionSelect={(_, data) =>
-                updateField('tss_basin', (data.optionValue ?? undefined) as OpportunityFormData['tss_basin'])
-              }
-              clearable
-            >
-              {BASINS.map((b) => (
-                <Option key={b} value={b}>{b}</Option>
-              ))}
-            </Dropdown>
-          </FormField>
-
           <FormField label="Pursuit Decision" error={errors.tss_pursuitDecision}>
             <Dropdown
               value={form.tss_pursuitDecision ?? ''}

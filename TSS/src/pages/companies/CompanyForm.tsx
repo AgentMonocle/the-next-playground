@@ -14,7 +14,7 @@ import { FormField } from '@/components/shared/FormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useCompany, useCompanies, useCreateCompany, useUpdateCompany } from '@/hooks/useCompanies';
 import { useCountries } from '@/hooks/useReferenceData';
-import { companyFormSchema, INDUSTRIES, COMPANY_TYPES, BASINS, type CompanyFormData } from '@/types';
+import { companyFormSchema, INDUSTRIES, COMPANY_TYPES, type CompanyFormData } from '@/types';
 
 export function CompanyForm() {
   const { id } = useParams<{ id: string }>();
@@ -49,7 +49,6 @@ export function CompanyForm() {
         tss_phone: existingCompany.tss_phone ?? '',
         tss_address: existingCompany.tss_address ?? '',
         tss_companyType: existingCompany.tss_companyType,
-        tss_basin: existingCompany.tss_basin,
         tss_notes: existingCompany.tss_notes ?? '',
         tss_isActive: existingCompany.tss_isActive,
       });
@@ -156,37 +155,21 @@ export function CompanyForm() {
           </FormField>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField label="Country" error={errors.tss_countryId}>
-            <Combobox
-              value={countries?.find((c) => c.id === form.tss_countryId)?.Title ?? ''}
-              onOptionSelect={(_, data) => {
-                const countryId = data.optionValue ? Number(data.optionValue) : undefined;
-                updateField('tss_countryId', countryId);
-              }}
-              freeform={false}
-              clearable
-            >
-              {(countries ?? []).map((c) => (
-                <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
-              ))}
-            </Combobox>
-          </FormField>
-
-          <FormField label="Basin/Region" error={errors.tss_basin}>
-            <Dropdown
-              value={form.tss_basin ?? ''}
-              onOptionSelect={(_, data) =>
-                updateField('tss_basin', (data.optionValue ?? undefined) as CompanyFormData['tss_basin'])
-              }
-              clearable
-            >
-              {BASINS.map((b) => (
-                <Option key={b} value={b}>{b}</Option>
-              ))}
-            </Dropdown>
-          </FormField>
-        </div>
+        <FormField label="Country" error={errors.tss_countryId}>
+          <Combobox
+            value={countries?.find((c) => c.id === form.tss_countryId)?.Title ?? ''}
+            onOptionSelect={(_, data) => {
+              const countryId = data.optionValue ? Number(data.optionValue) : undefined;
+              updateField('tss_countryId', countryId);
+            }}
+            freeform={false}
+            clearable
+          >
+            {(countries ?? []).map((c) => (
+              <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
+            ))}
+          </Combobox>
+        </FormField>
 
         <Switch
           checked={form.tss_isSubsidiary ?? false}

@@ -6,8 +6,10 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useContact, useDeleteContact } from '@/hooks/useContacts';
+import { useContactBasins, useAddContactBasin, useRemoveContactBasin } from '@/hooks/useBasinRegions';
+import { BasinPicker } from '@/components/shared/BasinPicker';
 import { useLookupMaps } from '@/hooks/useLookupMaps';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 function InfoRow({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -27,7 +29,33 @@ export function ContactDetail() {
   const contactId = id ? Number(id) : undefined;
   const { data: contact, isLoading, error, refetch } = useContact(contactId);
   const deleteContact = useDeleteContact();
+  const { data: contactBasins } = useContactBasins(contactId);
+  const addBasin = useAddContactBasin();
+  const removeBasin = useRemoveContactBasin();
   const { companyMap, resolve } = useLookupMaps();
+
+  const selectedBasinIds = useMemo(
+    () => (contactBasins ?? []).map((cb) => cb.tss_basinRegionId.LookupId),
+    [contactBasins]
+  );
+
+  const handleBasinChange = (newIds: number[]) => {
+    if (!contactId) return;
+    const currentIds = new Set(selectedBasinIds);
+    const targetIds = new Set(newIds);
+
+    for (const bid of newIds) {
+      if (!currentIds.has(bid)) {
+        addBasin.mutate({ contactId, basinRegionId: bid });
+      }
+    }
+
+    for (const cb of contactBasins ?? []) {
+      if (!targetIds.has(cb.tss_basinRegionId.LookupId)) {
+        removeBasin.mutate({ junctionId: cb.id, contactId });
+      }
+    }
+  };
 
   if (isLoading) return <LoadingState message="Loading contact..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -102,6 +130,15 @@ export function ContactDetail() {
           </div>
         </div>
       )}
+
+      {/* Basin/Regions */}
+      <div className="bg-white rounded-lg border p-6">
+        <h3 className="font-semibold text-gray-900 mb-3">Basin/Regions</h3>
+        <BasinPicker
+          selectedIds={selectedBasinIds}
+          onChange={handleBasinChange}
+        />
+      </div>
 
       {/* Company */}
       {contact.tss_companyId && (
