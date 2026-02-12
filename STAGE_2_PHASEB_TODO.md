@@ -1,56 +1,67 @@
 # Stage 2 Phase B — Entra ID & Azure Permissions Checklist
 
 **Purpose**: Manual steps required in Azure Portal / Entra ID before Phase B features work.
-**App Registration**: Tejas Sales System (`84b10c49-3622-42ac-8fec-42a84d148b3b`)
 **Tenant**: `b274090c-1d9c-4722-8c7e-554c3aafd2b2`
 
----
+### Architecture: Two Separate Identities
 
-## 1. Add Delegated API Permissions (for SPA email/calendar)
+| Component | Identity | Auth Flow | Permission Type |
+|-----------|----------|-----------|-----------------|
+| SPA (React app) | App Registration "Tejas Sales System (TSS)" (`84b10c49-...`) | Authorization Code (interactive, per-user) | **Delegated only** |
+| Azure Functions (webhooks, timers) | SWA Managed Identity (system-assigned) | Client Credentials (no user present) | **Application only** |
 
-> Portal: Entra ID → App registrations → Tejas Sales System → API permissions
-
-- [ ] Add **Mail.Read** (Delegated) — Read user's email
-- [ ] Add **Mail.Send** (Delegated) — Send email on behalf of user
-- [ ] Add **Calendars.ReadWrite** (Delegated) — Read/write user calendar
-- [ ] Click **Grant admin consent for Tejas Research & Engineering**
-
-**Why**: The SPA needs these scopes to call `/me/messages` and `/me/sendMail` on behalf of the logged-in user. Without admin consent, users will see a consent prompt they can't approve (tenant requires admin consent for Mail scopes).
-
-**After granting**: Users will need to sign out and back in to get a token with the new scopes. The first login will show an updated consent prompt.
+**Why separate?** Delegated permissions (act on behalf of a signed-in user) and application permissions (act as the service itself, across all users) serve fundamentally different purposes and have different security profiles. Keeping them on separate identities follows the principle of least privilege — the SPA never carries application-level permissions that could read any user's mailbox, and the background functions never carry delegated permissions they can't use.
 
 ---
 
-## 2. Add Application Permissions (for Azure Functions webhook)
+## 1. Add Delegated API Permissions to SPA App Registration
 
-> Portal: Entra ID → App registrations → Tejas Sales System → API permissions
+> Portal: Entra ID → App registrations → **Tejas Sales System (TSS)** → API permissions
 
-- [ ] Add **Mail.Read** (Application) — Read all users' mail (for webhook email auto-link)
-- [ ] Add **User.Read.All** (Application) — Resolve user display names
-- [ ] Click **Grant admin consent for Tejas Research & Engineering**
+This app registration is used by the React SPA only. It should have **delegated permissions only** — no application permissions.
 
-**Why**: The email webhook Azure Function runs as a background process (not on behalf of any user). It needs application permissions to read email content when a webhook notification arrives, match senders/recipients against CRM contacts, and create activity records.
+- [x] **User.Read** (Delegated) — Already granted
+- [x] **Sites.ReadWrite.All** (Delegated) — Already granted
+- [x] **Mail.Read** (Delegated) — Read signed-in user's email
+- [x] **Mail.Send** (Delegated) — Send email on behalf of signed-in user
+- [x] **Calendars.ReadWrite** (Delegated) — Read/write signed-in user's calendar
+- [x] Click **Grant admin consent for Tejas Research & Engineering**
 
-**Note**: Application-level `Sites.ReadWrite.All` is already granted (used by provisioning scripts). The webhook function reuses this to create TSS_Activity records.
+**Why**: The SPA calls `/me/messages`, `/me/sendMail`, and `/me/calendarView` on behalf of the logged-in user. Without admin consent, users see a consent prompt they can't approve (tenant requires admin consent for Mail scopes).
+
+**After granting**: Users need to sign out and back in to get a token with the new scopes.
+
+> **Important**: Do NOT add application permissions (Mail.Read Application, User.Read.All, etc.) to this registration. Those belong to the Managed Identity (see steps 3–4).
 
 ---
 
-## 3. Enable Managed Identity on SWA (for Azure Functions auth)
+## 2. Enable Managed Identity on SWA
 
 > Portal: Static Web Apps → salmon-glacier → Identity → System assigned
 
 - [ ] Set **Status** to **On**
-- [ ] Copy the **Object (principal) ID** — you'll need it for step 4
+- [ ] Copy the **Object (principal) ID** — you'll need it for step 3
 
-**Why**: Azure Functions in SWA use Managed Identity to authenticate with Graph API using application permissions. This avoids storing client secrets in environment variables.
+**Why**: The Azure Functions (email webhook handler, subscription management, renewal timer) run as background processes with no signed-in user. They authenticate with Graph API via the SWA's Managed Identity using application permissions. This avoids storing client secrets in environment variables.
 
 ---
 
-## 4. Grant Managed Identity Graph API Permissions
+## 3. Grant Application Permissions to the Managed Identity
 
-> This requires PowerShell / Azure CLI — cannot be done in the portal UI
+> This requires PowerShell / Azure CLI — cannot be done in the portal UI.
+> These permissions are granted directly to the Managed Identity's service principal, NOT to the SPA app registration.
 
-Run the following PowerShell (replace `<MANAGED_IDENTITY_OBJECT_ID>` with the value from step 3):
+The Managed Identity needs these **application** permissions:
+
+| Permission | Type | Purpose |
+|------------|------|---------|
+| `Mail.Read` | Application | Read email content when webhook notification arrives |
+| `User.Read.All` | Application | Resolve user display names for activity records |
+| `Sites.ReadWrite.All` | Application | Create TSS_Activity records in SharePoint |
+
+### Option A: PowerShell
+
+Replace `<MANAGED_IDENTITY_OBJECT_ID>` with the value from step 2:
 
 ```powershell
 # Connect to Microsoft Graph
@@ -76,7 +87,7 @@ New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $miSP.Id `
   -ResourceId $graphSP.Id `
   -AppRoleId $userReadRole.Id
 
-# Sites.ReadWrite.All application role (if not already granted)
+# Sites.ReadWrite.All application role
 $sitesRole = $graphSP.AppRoles | Where-Object { $_.Value -eq "Sites.ReadWrite.All" }
 New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $miSP.Id `
   -PrincipalId $miSP.Id `
@@ -84,7 +95,8 @@ New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $miSP.Id `
   -AppRoleId $sitesRole.Id
 ```
 
-**Alternative (Azure CLI)**:
+### Option B: Azure CLI
+
 ```bash
 MI_OBJECT_ID="<MANAGED_IDENTITY_OBJECT_ID>"
 GRAPH_SP_ID=$(az ad sp show --id 00000003-0000-0000-c000-000000000000 --query id -o tsv)
@@ -98,53 +110,78 @@ az rest --method POST \
 az rest --method POST \
   --uri "https://graph.microsoft.com/v1.0/servicePrincipals/$MI_OBJECT_ID/appRoleAssignments" \
   --body "{\"principalId\":\"$MI_OBJECT_ID\",\"resourceId\":\"$GRAPH_SP_ID\",\"appRoleId\":\"df021288-bdef-4463-88db-98f22de89214\"}"
+
+# Sites.ReadWrite.All = 9492366f-7969-46a4-8d15-ed1a20078fff
+az rest --method POST \
+  --uri "https://graph.microsoft.com/v1.0/servicePrincipals/$MI_OBJECT_ID/appRoleAssignments" \
+  --body "{\"principalId\":\"$MI_OBJECT_ID\",\"resourceId\":\"$GRAPH_SP_ID\",\"appRoleId\":\"9492366f-7969-46a4-8d15-ed1a20078fff\"}"
 ```
+
+### Verify Permissions Were Granted
+
+```powershell
+# List app role assignments for the managed identity
+Get-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $miSP.Id | Format-Table AppRoleId, ResourceDisplayName
+```
+
+Or in the portal: Entra ID → Enterprise applications → (search for MI name) → Permissions
 
 ---
 
-## 5. Set SWA Application Settings (Environment Variables)
+## 4. Set SWA Application Settings (Environment Variables)
 
 > Portal: Static Web Apps → salmon-glacier → Configuration → Application settings
 
-- [ ] Add `SHAREPOINT_SITE_ID` — The SharePoint site ID (can be retrieved from Graph API)
+- [ ] Add `SHAREPOINT_SITE_ID` — The SharePoint site ID
 - [ ] Add `WEBHOOK_CLIENT_STATE` — A random secret string for webhook validation (generate with `openssl rand -hex 32`)
+- [ ] Add `WEBHOOK_NOTIFICATION_URL` — `https://salmon-glacier-05e6b7410.4.azurestaticapps.net/api/email-webhook`
 
 **To get SHAREPOINT_SITE_ID**:
+
 ```bash
 # Using Graph Explorer or CLI:
 GET https://graph.microsoft.com/v1.0/sites/tejasre.sharepoint.com:/sites/sales?$select=id
 # Returns something like: "tejasre.sharepoint.com,<guid>,<guid>"
+# Use the full value (including commas) as SHAREPOINT_SITE_ID
 ```
 
 ---
 
-## 6. Create Webhook Subscription (after deploy)
+## 5. Create Webhook Subscription (after deploy)
 
-> This step happens AFTER the Azure Functions are deployed
+> This step happens AFTER the Azure Functions are deployed and steps 2–4 are complete.
 
-- [ ] Deploy the `stage-2-activities` branch to SWA
-- [ ] Call the subscription creation endpoint:
+- [ ] Deploy the `stage-2-activities` branch to SWA (merge to master)
+- [ ] Get the user ID (GUID) for each user to monitor:
   ```bash
-  # Replace with actual SWA hostname and user IDs to monitor
+  # Graph Explorer or CLI:
+  GET https://graph.microsoft.com/v1.0/users/sebastian@tejasre.onmicrosoft.com?$select=id
+  ```
+- [ ] Call the subscription creation endpoint for each user:
+  ```bash
   curl -X POST "https://salmon-glacier-05e6b7410.4.azurestaticapps.net/api/subscriptions" \
     -H "Content-Type: application/json" \
-    -d '{"userIds": ["sebastian@tejasre.onmicrosoft.com"]}'
+    -d '{"userId": "<USER_GUID>"}'
   ```
-- [ ] Verify subscription was created (check function logs)
+- [ ] Verify subscription was created:
+  ```bash
+  curl "https://salmon-glacier-05e6b7410.4.azurestaticapps.net/api/subscriptions"
+  ```
 
 ---
 
 ## Completion Checklist
 
-| Step | What | Status |
-|------|------|--------|
-| 1 | Delegated permissions (Mail.Read, Mail.Send, Calendars.ReadWrite) | [ ] |
-| 2 | Application permissions (Mail.Read, User.Read.All) | [ ] |
-| 3 | Enable Managed Identity on SWA | [ ] |
-| 4 | Grant MI Graph API permissions via PowerShell | [ ] |
-| 5 | Set SWA environment variables | [ ] |
-| 6 | Create webhook subscription post-deploy | [ ] |
+| Step | What | Identity | Status |
+|------|------|----------|--------|
+| 1 | Delegated permissions (Mail, Calendar) on SPA app reg | App Registration (TSS) | [x] |
+| 2 | Enable Managed Identity on SWA | Managed Identity | [ ] |
+| 3 | Grant MI application permissions (Mail.Read, User.Read.All, Sites.ReadWrite.All) | Managed Identity | [ ] |
+| 4 | Set SWA environment variables | SWA Config | [ ] |
+| 5 | Deploy & create webhook subscription | Post-deploy | [ ] |
 
-**After completing steps 1-5**: Sign out of TSS and sign back in. You should see an updated consent prompt listing Mail and Calendar permissions. The email panel on Contact detail pages will start working.
+### What works after each step:
 
-**After step 6**: Emails sent to/from CRM contacts will automatically create Activity records in TSS.
+- **After step 1**: Sign out and back in → Email panel on Contact pages works (read + send), Calendar view on Dashboard works
+- **After steps 2–4**: Azure Functions can authenticate with Graph API using application permissions
+- **After step 5**: Emails to/from CRM contacts automatically create Activity records in TSS
