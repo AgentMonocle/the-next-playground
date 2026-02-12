@@ -123,6 +123,7 @@ export function OpportunityForm() {
       }
     } catch (err) {
       setErrors({ _form: err instanceof Error ? err.message : 'Failed to save' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

@@ -129,21 +129,32 @@ export function useCreateOpportunity() {
     mutationFn: async (data: OpportunityFormData & { companyCode: string }) => {
       const client = getGraphClient(instance);
 
-      // Step 1: Generate opportunity ID via Azure Function
-      const idResponse = await fetch('/api/generate-id', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          entityType: 'OPP',
-          companyCode: data.companyCode,
-        }),
-      });
+      // Step 1: Generate opportunity ID via Azure Function (with client-side fallback)
+      let opportunityId: string;
+      try {
+        const idResponse = await fetch('/api/generate-id', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entityType: 'OPP',
+            companyCode: data.companyCode,
+          }),
+        });
 
-      if (!idResponse.ok) {
-        throw new Error(`Failed to generate ID: ${idResponse.statusText}`);
+        if (!idResponse.ok) {
+          throw new Error(`HTTP ${idResponse.status}`);
+        }
+
+        const result = (await idResponse.json()) as { id: string };
+        opportunityId = result.id;
+      } catch {
+        // Fallback: generate ID client-side (local dev or API unavailable)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const counter = String(Date.now() % 1000).padStart(3, '0');
+        opportunityId = `OPP-${data.companyCode}-${year}-${month}-${counter}`;
       }
-
-      const { id: opportunityId } = (await idResponse.json()) as { id: string };
 
       // Step 2: Create the opportunity in SharePoint
       const fields: Record<string, unknown> = {
