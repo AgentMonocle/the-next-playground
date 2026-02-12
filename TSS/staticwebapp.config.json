@@ -16,6 +16,10 @@
       "allowedRoles": ["anonymous"]
     },
     {
+      "route": "/api/subscriptions",
+      "allowedRoles": ["anonymous"]
+    },
+    {
       "route": "/api/*",
       "allowedRoles": ["authenticated"]
     }
