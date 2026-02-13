@@ -88,10 +88,10 @@ By default, `Mail.Read` (Application) can read **all** mailboxes in the tenant. 
 
 ## Step 5. Deploy Daemon Functions
 
-The daemon functions are deployed from the `api-daemon/` folder:
+The daemon functions are deployed from the `TSS/api-daemon/` folder:
 
 ```bash
-cd api-daemon
+cd TSS/api-daemon
 npm install && npm run build
 func azure functionapp publish tss-daemon-func
 ```
