@@ -14,6 +14,7 @@ import { FormField } from '@/components/shared/FormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useCompany, useCompanies, useCreateCompany, useUpdateCompany } from '@/hooks/useCompanies';
 import { useCountries } from '@/hooks/useReferenceData';
+import { useSuppressAutoFill } from '@/hooks/useSuppressAutoFill';
 import { companyFormSchema, INDUSTRIES, COMPANY_TYPES, type CompanyFormData } from '@/types';
 
 export function CompanyForm() {
@@ -108,6 +109,8 @@ export function CompanyForm() {
     );
   }, [allCompanies, companyId, parentQuery]);
 
+  const suppressAutoFill = useSuppressAutoFill();
+
   if (isEdit && loadingCompany) return <LoadingState message="Loading company..." />;
 
   return (
@@ -185,9 +188,7 @@ export function CompanyForm() {
             onOpenChange={(_, data) => {
               if (!data.open) setCountryQuery('');
             }}
-            autoComplete="off"
-            data-lpignore="true"
-            data-form-type="other"
+            input={{ autoComplete: 'off', ref: suppressAutoFill }}
           >
             {filteredCountries.map((c) => (
               <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
@@ -216,9 +217,7 @@ export function CompanyForm() {
               onOpenChange={(_, data) => {
                 if (!data.open) setParentQuery('');
               }}
-              autoComplete="off"
-            data-lpignore="true"
-            data-form-type="other"
+              input={{ autoComplete: 'off', ref: suppressAutoFill }}
             >
               {parentOptions.map((c) => (
                 <Option key={c.id} value={String(c.id)} text={`${c.Title} (${c.tss_companyCode})`}>{`${c.Title} (${c.tss_companyCode})`}</Option>

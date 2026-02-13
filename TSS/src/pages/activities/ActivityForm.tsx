@@ -16,6 +16,7 @@ import { useActivity, useCreateActivity, useUpdateActivity } from '@/hooks/useAc
 import { useCompanies } from '@/hooks/useCompanies';
 import { useContactsByCompany } from '@/hooks/useContacts';
 import { useOpportunities } from '@/hooks/useOpportunities';
+import { useSuppressAutoFill } from '@/hooks/useSuppressAutoFill';
 import {
   activityFormSchema,
   ACTIVITY_TYPES,
@@ -125,6 +126,8 @@ export function ActivityForm() {
     }
   };
 
+  const suppressAutoFill = useSuppressAutoFill();
+
   if (isEdit && loadingActivity) return <LoadingState message="Loading activity..." />;
 
   const selectedCompany = companies?.find((c) => c.id === form.tss_companyId);
@@ -230,6 +233,7 @@ export function ActivityForm() {
             freeform={false}
             clearable
             placeholder="Search companies..."
+            input={{ autoComplete: 'off', ref: suppressAutoFill }}
           >
             {(companies ?? []).map((c) => (
               <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
@@ -249,6 +253,7 @@ export function ActivityForm() {
               clearable
               disabled={!selectedCompanyId}
               placeholder={selectedCompanyId ? 'Select contact...' : 'Select a company first'}
+              input={{ autoComplete: 'off', ref: suppressAutoFill }}
             >
               {(companyContacts ?? []).map((c) => (
                 <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
@@ -267,6 +272,7 @@ export function ActivityForm() {
               clearable
               disabled={!selectedCompanyId}
               placeholder={selectedCompanyId ? 'Select opportunity...' : 'Select a company first'}
+              input={{ autoComplete: 'off', ref: suppressAutoFill }}
             >
               {(companyOpportunities ?? []).map((o) => (
                 <Option key={o.id} value={String(o.id)}>{o.Title}</Option>

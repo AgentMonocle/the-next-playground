@@ -15,6 +15,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { useOpportunity, useCreateOpportunity, useUpdateOpportunity } from '@/hooks/useOpportunities';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useContactsByCompany } from '@/hooks/useContacts';
+import { useSuppressAutoFill } from '@/hooks/useSuppressAutoFill';
 import {
   opportunityFormSchema,
   OPPORTUNITY_STAGES,
@@ -125,6 +126,8 @@ export function OpportunityForm() {
     }
   };
 
+  const suppressAutoFill = useSuppressAutoFill();
+
   if (isEdit && loadingOpp) return <LoadingState message="Loading opportunity..." />;
 
   const selectedCompany = companies?.find((c) => c.id === form.tss_companyId);
@@ -169,6 +172,7 @@ export function OpportunityForm() {
               }}
               freeform={false}
               clearable
+              input={{ autoComplete: 'off', ref: suppressAutoFill }}
             >
               {(companies ?? []).map((c) => (
                 <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
@@ -186,6 +190,7 @@ export function OpportunityForm() {
               freeform={false}
               clearable
               disabled={!selectedCompanyId}
+              input={{ autoComplete: 'off', ref: suppressAutoFill }}
               placeholder={selectedCompanyId ? 'Select contact...' : 'Select a company first'}
             >
               {(companyContacts ?? []).map((c) => (

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Combobox, Option, InteractionTag, InteractionTagPrimary, TagGroup } from '@fluentui/react-components';
+import { Combobox, Option, InteractionTag, InteractionTagPrimary, InteractionTagSecondary, TagGroup } from '@fluentui/react-components';
 import { useBasinRegions } from '@/hooks/useBasinRegions';
 import type { BasinRegion } from '@/types';
 
@@ -67,6 +67,7 @@ export function BasinPicker({ selectedIds, onChange, disabled }: BasinPickerProp
                   <InteractionTagPrimary hasSecondaryAction={!disabled}>
                     {basin?.Title ?? `Basin #${id}`}
                   </InteractionTagPrimary>
+                  {!disabled && <InteractionTagSecondary />}
                 </InteractionTag>
               );
             })}

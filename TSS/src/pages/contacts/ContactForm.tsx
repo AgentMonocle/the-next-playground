@@ -14,6 +14,7 @@ import { FormField } from '@/components/shared/FormField';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { useContact, useCreateContact, useUpdateContact } from '@/hooks/useContacts';
 import { useCompanies } from '@/hooks/useCompanies';
+import { useSuppressAutoFill } from '@/hooks/useSuppressAutoFill';
 import { contactFormSchema, DEPARTMENTS, type ContactFormData } from '@/types';
 
 export function ContactForm() {
@@ -94,6 +95,8 @@ export function ContactForm() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  const suppressAutoFill = useSuppressAutoFill();
 
   if (isEdit && loadingContact) return <LoadingState message="Loading contact..." />;
 
@@ -185,6 +188,7 @@ export function ContactForm() {
             }}
             freeform={false}
             clearable
+            input={{ autoComplete: 'off', ref: suppressAutoFill }}
           >
             {companyOptions.map((c) => (
               <Option key={c.id} value={String(c.id)} text={c.Title}>{c.Title}</Option>

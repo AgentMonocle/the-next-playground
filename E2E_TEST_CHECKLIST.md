@@ -176,28 +176,28 @@
 
 ### Contact List (`/contacts`)
 
-- [ ] Shows correct count ("{N} contacts")
-- [ ] DataGrid columns: Full Name, Email, Phone, Company, Job Title, DM, Status
-- [ ] Search by name filters results
-- [ ] Search by email filters results
-- [ ] Department dropdown filters
-- [ ] DM (Decision Maker) badge displays on flagged contacts
-- [ ] Click row navigates to `/contacts/:id`
-- [ ] "New Contact" button navigates to `/contacts/new`
-- [ ] Empty state with "New Contact" link
+- [x] Shows correct count ("{N} contacts")
+- [x] DataGrid columns: Full Name, Email, Phone, Company, Job Title, DM, Status
+- [x] Search by name filters results
+- [x] Search by email filters results
+- [x] Department dropdown filters
+- [x] DM (Decision Maker) badge displays on flagged contacts
+- [x] Click row navigates to `/contacts/:id`
+- [x] "New Contact" button navigates to `/contacts/new`
+- [x] Empty state with "New Contact" link
 
 ### Contact Detail (`/contacts/:id`)
 
-- [ ] Header: Contact name, Company name subtitle, Active/Inactive badge
-- [ ] Contact Info: Email, Phone, Mobile
-- [ ] Role: Job Title, Department, Preferred Name
-- [ ] Flags: Decision Maker and/or Influencer badges
-- [ ] Basin picker works (add/remove)
-- [ ] Company link navigates to `/companies/:id`
-- [ ] QuickActions pre-fill contactId AND companyId
-- [ ] Activity Timeline loads correctly
-- [ ] "Edit" navigates to edit form
-- [ ] "Deactivate" opens confirm dialog, deactivates on confirm
+- [x] Header: Contact name, Company name subtitle, Active/Inactive badge
+- [x] Contact Info: Email, Phone, Mobile
+- [x] Role: Job Title, Department, Preferred Name
+- [x] Flags: Decision Maker and/or Influencer badges
+- [x] Basin picker works (add/remove)
+- [x] Company link navigates to `/companies/:id`
+- [x] QuickActions pre-fill contactId AND companyId
+- [x] Activity Timeline loads correctly
+- [x] "Edit" navigates to edit form
+- [x] "Deactivate" opens confirm dialog, deactivates on confirm
 
 ### Email Panel (on Contact Detail)
 
