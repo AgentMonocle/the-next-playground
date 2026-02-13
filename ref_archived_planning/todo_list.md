@@ -1,3 +1,13 @@
+> **⚠️ ARCHIVED DOCUMENT — HISTORICAL REFERENCE ONLY**
+>
+> This file was archived on 2026-02-13. It is retained for historical reference
+> and **must not** be used as a guiding design or planning document. The
+> information, task statuses, and bead references herein may be outdated or
+> superseded by later work. For current project state, consult the beads
+> system (`bd list`, `bd ready`).
+
+---
+
 # Stage 1: Core CRM Beta — Remaining Tasks
 
 **Epic**: `the-next-playground-8jc` (in_progress)

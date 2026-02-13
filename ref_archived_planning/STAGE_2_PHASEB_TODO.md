@@ -1,3 +1,13 @@
+> **⚠️ ARCHIVED DOCUMENT — HISTORICAL REFERENCE ONLY**
+>
+> This file was archived on 2026-02-13. It is retained for historical reference
+> and **must not** be used as a guiding design or planning document. The
+> information, checklist statuses, and infrastructure details herein may be
+> outdated or superseded by later work. For current project state, consult
+> the beads system (`bd list`, `bd ready`).
+
+---
+
 # Stage 2 Phase B — Entra ID & Azure Permissions Checklist
 
 **Purpose**: Manual steps required in Azure Portal / CLI before Phase B features work.
@@ -20,7 +30,7 @@
 
 ---
 
-## Step 1. SPA Delegated Permissions ✅
+## Step 1. SPA Delegated Permissions
 
 > Already complete.
 
@@ -68,104 +78,29 @@ Permissions granted:
 | `User.Read.All` | Application | Resolve user display names for activity records |
 | `Sites.ReadWrite.All` | Application | Create TSS_Activity records in SharePoint |
 
-Verify:
-
-```bash
-MI_OBJECT_ID="<from step 2>"
-az rest --method GET \
-  --uri "https://graph.microsoft.com/v1.0/servicePrincipals/$MI_OBJECT_ID/appRoleAssignments" \
-  --query "value[].{Permission:appRoleId, Resource:resourceDisplayName}" \
-  -o table
-```
-
 ---
 
 ## Step 4. Restrict Mail Access (Application Access Policy)
 
-By default, `Mail.Read` (Application) can read **all** mailboxes in the tenant. Restrict it to only the monitored sales users:
-
-### 4a. Create a mail-enabled security group
-
-> Portal: Entra ID → Groups → New group
-
-- **Group type**: Mail-enabled security (or Security if mail-enabled not available)
-- **Name**: `TSS Monitored Users`
-- **Email**: `tss-monitored-users@tejasre.com`
-- **Members**: Add the 4 sales users who should have email monitoring
-
-### 4b. Create the Application Access Policy
-
-```powershell
-# Connect to Exchange Online
-Connect-ExchangeOnline
-
-# Get the MI's application ID (NOT object ID)
-# You can find it in: Entra ID → Enterprise applications → tss-daemon-func → Application ID
-
-New-ApplicationAccessPolicy `
-  -AppId "<MI_APPLICATION_ID>" `
-  -PolicyScopeGroupId "tss-monitored-users@tejasre.com" `
-  -AccessRight RestrictAccess `
-  -Description "Limit TSS daemon to monitored sales users only"
-
-# Verify the policy
-Get-ApplicationAccessPolicy -Identity "<MI_APPLICATION_ID>"
-
-# Test access (should return "Granted")
-Test-ApplicationAccessPolicy `
-  -Identity "<MI_APPLICATION_ID>" `
-  -AppId "<MI_APPLICATION_ID>" `
-  -Mailbox "sebastian@tejasre.com"
-```
-
-> **Note**: This step requires the Exchange Online PowerShell module (`Install-Module ExchangeOnlineManagement`). The policy can take up to 30 minutes to propagate.
+By default, `Mail.Read` (Application) can read **all** mailboxes in the tenant. Restrict it to only the monitored sales users.
 
 ---
 
 ## Step 5. Deploy Daemon Functions
 
-The daemon functions are deployed from the `TSS/api-daemon/` folder:
+The daemon functions are deployed from the `api-daemon/` folder:
 
 ```bash
-cd TSS/api-daemon
+cd api-daemon
 npm install && npm run build
 func azure functionapp publish tss-daemon-func
-```
-
-Or if using GitHub Actions (CI/CD pipeline will be set up):
-
-```bash
-git push  # triggers deploy via GitHub Actions
-```
-
-Verify deployment:
-
-```bash
-curl -s "https://tss-daemon-func.azurewebsites.net/api/health"
 ```
 
 ---
 
 ## Step 6. Create Webhook Subscriptions
 
-Create a subscription for each monitored user:
-
-```bash
-FUNC_URL="https://tss-daemon-func.azurewebsites.net"
-
-# Get user IDs
-az rest --method GET \
-  --uri "https://graph.microsoft.com/v1.0/users/sebastian@tejasre.com?\$select=id,displayName" \
-  --query "{id:id, name:displayName}" -o table
-
-# Create subscription (repeat for each user)
-curl -X POST "$FUNC_URL/api/subscriptions" \
-  -H "Content-Type: application/json" \
-  -d '{"userId": "<USER_GUID>"}'
-
-# List active subscriptions
-curl -s "$FUNC_URL/api/subscriptions"
-```
+Create a subscription for each monitored user.
 
 ---
 
@@ -191,11 +126,3 @@ After the BYOF functions are deployed and working:
 | 5 | Deploy daemon functions | [ ] |
 | 6 | Create webhook subscriptions for users | [ ] |
 | 7 | Clean up SWA config | [ ] |
-
-### What works after each step:
-
-- **After step 1**: Email panel (read + send) and Calendar view work in SPA
-- **After steps 2–4**: Daemon functions can securely access only monitored users' mail
-- **After step 5**: Functions deployed and reachable
-- **After step 6**: Emails to/from CRM contacts automatically create Activity records
-- **After step 7**: Clean architecture, no leftover temporary config
