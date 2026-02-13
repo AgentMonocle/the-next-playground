@@ -185,7 +185,9 @@ export function CompanyForm() {
             onOpenChange={(_, data) => {
               if (!data.open) setCountryQuery('');
             }}
-            input={{ autoComplete: 'off', 'data-lpignore': 'true', 'data-form-type': 'other' } as React.InputHTMLAttributes<HTMLInputElement>}
+            autoComplete="off"
+            data-lpignore="true"
+            data-form-type="other"
           >
             {filteredCountries.map((c) => (
               <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
@@ -214,7 +216,9 @@ export function CompanyForm() {
               onOpenChange={(_, data) => {
                 if (!data.open) setParentQuery('');
               }}
-              input={{ autoComplete: 'off', 'data-lpignore': 'true', 'data-form-type': 'other' } as React.InputHTMLAttributes<HTMLInputElement>}
+              autoComplete="off"
+            data-lpignore="true"
+            data-form-type="other"
             >
               {parentOptions.map((c) => (
                 <Option key={c.id} value={String(c.id)} text={`${c.Title} (${c.tss_companyCode})`}>{`${c.Title} (${c.tss_companyCode})`}</Option>
