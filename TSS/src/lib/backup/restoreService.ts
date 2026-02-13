@@ -58,14 +58,21 @@ const SELF_REF_FIELDS: Record<string, string[]> = {
   TSS_Opportunity: ['tss_relatedOpportunityIdLookupId'],
 };
 
-/** SharePoint system fields to strip before creating items */
+/** SharePoint system / read-only fields to strip before creating items */
 const SYSTEM_FIELDS = new Set([
+  // Internal metadata
   '_itemId', 'id', 'Created', 'Modified', 'AuthorLookupId', 'EditorLookupId',
   'Author', 'Editor', '_UIVersionString', 'Attachments', 'Edit',
   'ContentType', 'ContentTypeId', '_ComplianceFlags', '_ComplianceTag',
   '_ComplianceTagWrittenTime', '_ComplianceTagUserId',
   '_ModerationComments', '_ModerationStatus',
   'AppAuthorLookupId', 'AppEditorLookupId',
+  // Computed / read-only title variants
+  'LinkTitleNoMenu', 'LinkTitle',
+  // Additional read-only / computed fields returned by Graph
+  '_ColorTag', '_ColorHex', '_Emoji',
+  'FolderChildCount', 'ItemChildCount',
+  '_IsRecord',
 ]);
 
 /**
@@ -232,6 +239,10 @@ function buildRestoreFields(
     if (SYSTEM_FIELDS.has(key)) continue;
     // Skip OData metadata fields (@odata.etag, etc.)
     if (key.startsWith('@odata.')) continue;
+    // Whitelist: only include our tss_ custom fields and Title.
+    // This prevents any unknown SharePoint system/computed fields from
+    // causing "field is read-only" errors (e.g., LinkTitleNoMenu).
+    if (key !== 'Title' && !key.startsWith('tss_')) continue;
 
     // Skip self-referential fields — handled in pass 2
     if (selfRefFields.includes(key)) continue;
