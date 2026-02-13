@@ -47,7 +47,6 @@ export function useContacts(options: UseContactsOptions = {}) {
 
       const conditions: FilterCondition[] = [];
       if (options.companyId) conditions.push({ field: 'tss_companyIdLookupId', operator: 'eq', value: options.companyId });
-      if (options.department) conditions.push({ field: 'tss_department', operator: 'eq', value: options.department });
 
       const queryOptions: ListQueryOptions = {
         filter: conditions.length > 0 ? buildFilter(conditions) : undefined,
@@ -61,6 +60,11 @@ export function useContacts(options: UseContactsOptions = {}) {
       // Client-side boolean filter (SharePoint OData boolean filtering is unreliable)
       if (options.isActive !== undefined) {
         items = items.filter((c) => c.tss_isActive === options.isActive);
+      }
+
+      // Client-side dropdown filters (values with & break OData URL encoding)
+      if (options.department) {
+        items = items.filter((c) => c.tss_department === options.department);
       }
 
       if (options.search) {

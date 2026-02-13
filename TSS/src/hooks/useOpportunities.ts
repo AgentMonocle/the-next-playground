@@ -48,10 +48,7 @@ export function useOpportunities(options: UseOpportunitiesOptions = {}) {
       const client = getGraphClient(instance);
 
       const conditions: FilterCondition[] = [];
-      if (options.stage) conditions.push({ field: 'tss_stage', operator: 'eq', value: options.stage });
       if (options.companyId) conditions.push({ field: 'tss_companyIdLookupId', operator: 'eq', value: options.companyId });
-      if (options.productLine) conditions.push({ field: 'tss_productLine', operator: 'eq', value: options.productLine });
-      if (options.basin) conditions.push({ field: 'tss_basin', operator: 'eq', value: options.basin });
 
       const queryOptions: ListQueryOptions = {
         filter: conditions.length > 0 ? buildFilter(conditions) : undefined,
@@ -61,6 +58,17 @@ export function useOpportunities(options: UseOpportunitiesOptions = {}) {
 
       const result = await getListItems<Opportunity>(client, LIST_NAME, queryOptions);
       let items = result.items;
+
+      // Client-side dropdown filters (values with & break OData URL encoding)
+      if (options.stage) {
+        items = items.filter((o) => o.tss_stage === options.stage);
+      }
+      if (options.productLine) {
+        items = items.filter((o) => o.tss_productLine === options.productLine);
+      }
+      if (options.basin) {
+        items = items.filter((o) => o.tss_basin === options.basin);
+      }
 
       if (options.search) {
         const term = options.search.toLowerCase();

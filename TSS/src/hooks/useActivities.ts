@@ -53,7 +53,6 @@ export function useActivities(options: UseActivitiesOptions = {}) {
       const client = getGraphClient(instance);
 
       const conditions: FilterCondition[] = [];
-      if (options.activityType) conditions.push({ field: 'tss_activityType', operator: 'eq', value: options.activityType });
       if (options.companyId) conditions.push({ field: 'tss_companyIdLookupId', operator: 'eq', value: options.companyId });
       if (options.contactId) conditions.push({ field: 'tss_contactIdLookupId', operator: 'eq', value: options.contactId });
       if (options.opportunityId) conditions.push({ field: 'tss_opportunityIdLookupId', operator: 'eq', value: options.opportunityId });
@@ -68,6 +67,11 @@ export function useActivities(options: UseActivitiesOptions = {}) {
 
       const result = await getListItems<Activity>(client, LIST_NAME, queryOptions);
       let items = result.items;
+
+      // Client-side dropdown filter (values with & break OData URL encoding)
+      if (options.activityType) {
+        items = items.filter((a) => a.tss_activityType === options.activityType);
+      }
 
       // Client-side text search on Title
       if (options.search) {

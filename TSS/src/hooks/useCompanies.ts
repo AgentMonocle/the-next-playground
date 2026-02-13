@@ -8,10 +8,8 @@ import {
   createListItem,
   updateListItem,
   softDeleteListItem,
-  buildFilter,
   setLookupField,
   type ListQueryOptions,
-  type FilterCondition,
 } from '@/lib/graph/lists';
 import type { Company, CompanyFormData } from '@/types';
 
@@ -47,13 +45,7 @@ export function useCompanies(options: UseCompaniesOptions = {}) {
     queryFn: async () => {
       const client = getGraphClient(instance);
 
-      const conditions: FilterCondition[] = [];
-      if (options.industry) conditions.push({ field: 'tss_industry', operator: 'eq', value: options.industry });
-      if (options.companyType) conditions.push({ field: 'tss_companyType', operator: 'eq', value: options.companyType });
-      if (options.basin) conditions.push({ field: 'tss_basin', operator: 'eq', value: options.basin });
-
       const queryOptions: ListQueryOptions = {
-        filter: conditions.length > 0 ? buildFilter(conditions) : undefined,
         orderBy: 'fields/Title',
         top: options.top ?? 200,
       };
@@ -64,6 +56,17 @@ export function useCompanies(options: UseCompaniesOptions = {}) {
       // Client-side boolean filter (SharePoint OData boolean filtering is unreliable)
       if (options.isActive !== undefined) {
         items = items.filter((c) => c.tss_isActive === options.isActive);
+      }
+
+      // Client-side dropdown filters (values with & break OData URL encoding)
+      if (options.industry) {
+        items = items.filter((c) => c.tss_industry === options.industry);
+      }
+      if (options.companyType) {
+        items = items.filter((c) => c.tss_companyType === options.companyType);
+      }
+      if (options.basin) {
+        items = items.filter((c) => c.tss_basin === options.basin);
       }
 
       // Client-side search (SharePoint OData contains is limited)
