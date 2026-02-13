@@ -48,7 +48,7 @@
 Run the provisioning script:
 
 ```bash
-./ref_scripts/ProvisionByof.sh
+./reference/scripts/ProvisionByof.sh
 ```
 
 This script will:
@@ -64,10 +64,10 @@ This script will:
 
 ## Step 3. Grant MI Application Permissions
 
-Update `ref_scripts/GrantAppPerms.sh` with the new MI Object ID from step 2, then run it:
+Update `reference/scripts/GrantAppPerms.sh` with the new MI Object ID from step 2, then run it:
 
 ```bash
-./ref_scripts/GrantAppPerms.sh
+./reference/scripts/GrantAppPerms.sh
 ```
 
 Permissions granted:

@@ -1,6 +1,6 @@
 Using beads let's make modifications to the development plan.
 1) The Sharepoint Site will be the existing sales organization site (https://tejasre.sharepoint.com/sites/sales"
-2) Please review the data files in ref_datasets which are exports of lists (csv with schema) that I developed earlier that I would like to incorporate (the information, not that actual lists) into the development plan. Provide a report on how you will incorporate this information.
+2) Please review the data files in reference/datasets which are exports of lists (csv with schema) that I developed earlier that I would like to incorporate (the information, not that actual lists) into the development plan. Provide a report on how you will incorporate this information.
 	1) Client Records.csv
 	2) Company Records.csv
 	3) Countries.csv

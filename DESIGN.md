@@ -47,11 +47,13 @@ Browser / Mobile / Teams Tab (iframe)
     ▼
 Azure Static Web Apps
 ├── Frontend: React 19 + Vite + TypeScript + TailwindCSS
-├── API: Azure Functions v4 (TypeScript, isolated worker)
-│   ├── HTTP triggers (CRUD proxy to Graph API)
-│   ├── Timer triggers (email subscription renewal, digests)
-│   ├── Webhook triggers (Graph change notifications)
+├── Managed API (TSS/api): Azure Functions v4 (TypeScript, isolated worker)
 │   └── ID generation (generate-id, generate-quote-id)
+│
+Standalone Daemon (TSS/api-daemon): Azure Functions v4 (BYOF, Managed Identity)
+├── HTTP triggers (email webhook notifications)
+├── Timer triggers (subscription renewal, digests)
+└── Webhook triggers (Graph change notifications)
     │
     ▼  Microsoft Graph API v1.0
 SharePoint Lists (CRM data) + Document Library + Outlook + Calendar + OneDrive + Teams
@@ -72,9 +74,12 @@ the-next-playground/                    # Monorepo root
 ├── COMPANY_PROFILE.md                  # Business context
 ├── DESIGN.md                           # Architecture (this file)
 ├── DEVELOPMENT_PLAN.md                 # All stages
-├── STAGE_0_PLAN.md                     # Stage 0 implementation details
-├── ref_datasets/                       # Seed data CSVs
-├── ref_prompts/                        # Scoping prompts
+├── reference/                          # Reference material
+│   ├── archived_planning/             # Completed planning docs
+│   ├── datasets/                      # Seed data CSVs
+│   ├── deferred_planning/             # Deferred planning docs
+│   ├── prompts/                       # Scoping prompts
+│   └── scripts/                       # Utility scripts
 │
 └── TSS/                                # Tejas Sales System application
     ├── src/                            # React SPA source
@@ -93,8 +98,12 @@ the-next-playground/                    # Monorepo root
     │   ├── App.tsx                     # Auth-gated root component
     │   ├── main.tsx                    # Entry point (MSAL + Fluent + React Query)
     │   └── index.css                   # Tailwind imports
-    ├── api/                            # Azure Functions v4 (isolated worker)
-    │   └── src/functions/              # Function endpoints
+    ├── api/                            # Azure Functions v4 — SWA-managed API
+    │   └── src/functions/              # HTTP endpoints (generate-id, health)
+    ├── api-daemon/                     # Azure Functions v4 — standalone daemon
+    │   ├── src/functions/              # Webhook & timer functions
+    │   ├── package.json                # Independent deps (Graph Client, Azure Identity)
+    │   └── tsconfig.json               # Separate TS config
     ├── public/                         # Static assets
     ├── package.json                    # Frontend deps + dev scripts
     ├── vite.config.ts                  # Vite + Tailwind + @/ alias
@@ -108,7 +117,9 @@ the-next-playground/                    # Monorepo root
     └── .env.local                      # Actual env vars (NOT committed)
 ```
 
-Design docs and reference data live at the repo root. The TSS application (frontend + API) is self-contained under `TSS/` — all builds run from that directory (`cd TSS && npm run build`).
+Design docs and reference data live at the repo root. The TSS application (frontend + both API apps) is self-contained under `TSS/` — frontend builds run from that directory (`cd TSS && npm run build`).
+
+**Dual API architecture**: `TSS/api/` is the SWA-managed API (deployed automatically with the frontend, uses delegated user permissions). `TSS/api-daemon/` is a standalone Azure Functions app deployed independently to `tss-daemon-func.azurewebsites.net` (uses application permissions via Managed Identity for background tasks like email webhooks and subscription renewal). The daemon is accessed from the frontend via `VITE_DAEMON_API_URL`.
 
 ## Technology Stack
 
@@ -292,14 +303,21 @@ POST /me/sendMail
 
 ## Background Processing
 
+**SWA-managed API** (`TSS/api/` — delegated user permissions):
+
+| Function | Trigger | Purpose |
+|---|---|---|
+| `generate-id` | HTTP | Generate Opportunity IDs (`OPP-[CompanyCode]-YYYY-MM-NNN`) |
+| `generate-quote-id` | HTTP | Generate Quotation IDs (`QUO-[XXX]-[XXX]-V[N]`) |
+
+**Standalone daemon** (`TSS/api-daemon/` — application permissions via Managed Identity):
+
 | Function | Trigger | Purpose |
 |---|---|---|
 | `email-webhook` | HTTP (Graph webhook) | Detect new emails from CRM contacts |
 | `renew-subscriptions` | Timer (every 48h) | Renew Graph email subscriptions (3-day expiry) |
 | `daily-digest` | Timer (daily) | Pipeline summary → Teams channel via Graph |
 | `stale-deal-alert` | Timer (weekly) | Flag opportunities with no recent activity |
-| `generate-id` | HTTP | Generate Opportunity IDs (`OPP-[CompanyCode]-YYYY-MM-NNN`) |
-| `generate-quote-id` | HTTP | Generate Quotation IDs (`QUO-[XXX]-[XXX]-V[N]`) |
 
 ---
 
