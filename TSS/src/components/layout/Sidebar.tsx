@@ -20,6 +20,8 @@ import {
   Globe24Filled,
   Settings24Regular,
   Settings24Filled,
+  ShieldCheckmark24Regular,
+  ShieldCheckmark24Filled,
   PanelLeftContract24Regular,
   PanelLeftExpand24Regular,
 } from '@fluentui/react-icons';
@@ -142,8 +144,27 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom nav — Settings */}
+      {/* Bottom nav — Admin & Settings */}
       <div className="border-t border-gray-200 py-2">
+        <Tooltip
+          content="Admin"
+          relationship="label"
+          visible={sidebarCollapsed ? undefined : false}
+        >
+          <button
+            onClick={() => navigate('/admin')}
+            className={`flex items-center w-full px-4 py-2.5 text-sm transition-colors ${
+              isActive('/admin')
+                ? 'bg-blue-50 text-blue-700 font-medium'
+                : 'text-gray-700 hover:bg-gray-100'
+            } ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
+          >
+            <span className="flex-shrink-0">
+              {isActive('/admin') ? <ShieldCheckmark24Filled /> : <ShieldCheckmark24Regular />}
+            </span>
+            {!sidebarCollapsed && <span className="truncate">Admin</span>}
+          </button>
+        </Tooltip>
         <Tooltip
           content="Settings"
           relationship="label"

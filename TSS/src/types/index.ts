@@ -24,6 +24,8 @@ export { basinRegionFormSchema } from './basinRegion.js';
 export type { Activity, ActivityType, ActivityDirection, ActivitySource, ActivityFormData } from './activity.js';
 export { ACTIVITY_TYPES, ACTIVITY_DIRECTIONS, ACTIVITY_SOURCES, activityFormSchema } from './activity.js';
 
+export type { BackupManifest, BackupInfo, OperationProgress } from './backup.js';
+
 // ─── Shared Types ───────────────────────────────────────────────────────────
 
 /** Base fields present on every SharePoint list item */

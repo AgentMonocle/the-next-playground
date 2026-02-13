@@ -13,6 +13,7 @@
  * Prerequisites:
  *   - `az login` with an account that has Sites.ReadWrite.All or SharePoint Admin access
  */
+import type { Client } from '@microsoft/microsoft-graph-client';
 import { getAdminClient, getSiteId, ensureList, type ListDefinition } from './lib/graphAdmin.js';
 import { countryList } from './lists/country.js';
 import { productList } from './lists/product.js';
@@ -63,9 +64,40 @@ async function main() {
     await ensureList(client, siteId, listDef, listIdLookup);
   }
 
+  // Document Libraries
+  await ensureDocumentLibrary(client, siteId, 'TSS_Backups', 'Backup snapshots for TSS list data');
+
   console.log('\n================================');
   console.log('✅ Provisioning complete!');
-  console.log(`   ${listsInOrder.length} lists processed`);
+  console.log(`   ${listsInOrder.length} lists + 1 document library processed`);
+}
+
+/**
+ * Ensure a document library exists. Idempotent.
+ */
+async function ensureDocumentLibrary(
+  client: Client,
+  siteId: string,
+  displayName: string,
+  description: string
+): Promise<void> {
+  console.log(`\n📁 Ensuring document library: ${displayName}`);
+  try {
+    await client.api(`/sites/${siteId}/lists/${displayName}`).get();
+    console.log(`  Already exists`);
+  } catch (err: unknown) {
+    const error = err as { statusCode?: number };
+    if (error.statusCode === 404) {
+      await client.api(`/sites/${siteId}/lists`).post({
+        displayName,
+        description,
+        list: { template: 'documentLibrary' },
+      });
+      console.log(`  ✅ Created`);
+    } else {
+      throw err;
+    }
+  }
 }
 
 main().catch((err) => {
