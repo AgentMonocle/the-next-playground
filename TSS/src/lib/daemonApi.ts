@@ -11,7 +11,7 @@
  */
 
 const DAEMON_API_URL =
-  import.meta.env.VITE_DAEMON_API_URL ?? 'https://tss-daemon-func.azurewebsites.net';
+  import.meta.env.VITE_DAEMON_API_URL || 'https://tss-daemon-func.azurewebsites.net';
 
 export interface MonitoringStatus {
   monitoring: boolean;
