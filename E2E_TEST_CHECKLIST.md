@@ -19,72 +19,83 @@
 ## 1. Auth & Layout (`eny`)
 
 ### Login Flow
-- [ ] Unauthenticated user sees "Sign in with Microsoft" button
-- [ ] Click sign-in redirects to Microsoft login
-- [ ] After login, redirects back to dashboard
-- [ ] User name + avatar badge display in top-right header
+
+- [x] Unauthenticated user sees "Sign in with Microsoft" button
+- [x] Click sign-in redirects to Microsoft login
+- [x] After login, redirects back to dashboard
+- [x] User name + avatar badge display in top-right header
 
 ### Sidebar Navigation
-- [ ] All 8 nav items render: Dashboard, Companies, Contacts, Opportunities, Activities, Pipeline, Basin/Regions
-- [ ] Settings nav pinned to bottom with separator
-- [ ] Active route is highlighted (blue background, filled icon)
-- [ ] Clicking each nav item navigates to correct route
-- [ ] Collapse button toggles sidebar width (56px vs 224px)
-- [ ] Collapsed state shows icons only with tooltips
+
+- [x] All 8 nav items render: Dashboard, Companies, Contacts, Opportunities, Activities, Pipeline, Basin/Regions
+- [x] Settings nav pinned to bottom with separator
+- [x] Active route is highlighted (blue background, filled icon)
+- [x] Clicking each nav item navigates to correct route
+- [x] Collapse button toggles sidebar width (56px vs 224px)
+- [x] Collapsed state shows icons only with tooltips
 
 ### Sign-Out
-- [ ] "Sign out" button visible in header
-- [ ] Click sign-out clears session
-- [ ] Redirects to unauthenticated state
+
+- [x] "Sign out" button visible in header
+- [x] Click sign-out clears session
+- [x] Redirects to unauthenticated state
 
 ### Catch-All Route
-- [ ] Navigate to `/nonexistent` redirects to `/`
+
+- [x] Navigate to `/nonexistent` redirects to `/`
 
 ---
 
 ## 2. Dashboard (`73y`)
 
 ### Stat Cards
-- [ ] Total Companies count matches actual data
-- [ ] Total Contacts count matches actual data
-- [ ] Total Opportunities count matches actual data
-- [ ] "By Stage" card shows stage breakdown in subtitle
+
+- [x] Total Companies count matches actual data
+- [x] Total Contacts count matches actual data
+- [x] Total Opportunities count matches actual data
+- [x] "By Stage" card shows stage breakdown in subtitle
 
 ### Recent Opportunities
-- [ ] Shows last 5 modified opportunities
-- [ ] Each row displays: Title, Company name, Stage badge (colored), Revenue (formatted)
-- [ ] Click row navigates to `/opportunities/:id`
-- [ ] "View all opportunities" link navigates to `/opportunities`
+
+- [x] Shows last 5 modified opportunities
+- [x] Each row displays: Title, Company name, Stage badge (colored), Revenue (formatted)
+- [x] Click row navigates to `/opportunities/:id`
+- [x] "View all opportunities" link navigates to `/opportunities`
 - [ ] Empty state: "No opportunities yet" message + link
 
 ### Pipeline Summary
-- [ ] Shows cards for all stages (Lead through After Action)
-- [ ] Each card: stage badge, count, total revenue, progress bar
-- [ ] Progress bars scale relative to highest-revenue stage
-- [ ] "View Pipeline" button navigates to `/pipeline`
+
+- [x] Shows cards for all stages (Lead through After Action)
+- [x] Each card: stage badge, count, total revenue, progress bar
+- [x] Progress bars scale relative to highest-revenue stage
+- [x] "View Pipeline" button navigates to `/pipeline`
 
 ### Recent Activity
-- [ ] Shows last 8 activities
-- [ ] Each row: type icon, title, type badge (colored), company, owner, date
-- [ ] Click row navigates to `/activities/:id`
-- [ ] "View all activities" link navigates to `/activities`
+
+- [x] Shows last 8 activities
+- [x] Each row: type icon, title, type badge (colored), company, owner, date
+- [x] Click row navigates to `/activities/:id`
+- [x] "View all activities" link navigates to `/activities`
 - [ ] Empty state message when no activities
 
 ### Calendar Widget
-- [ ] Displays current week range
-- [ ] Previous/Today/Next week buttons work
-- [ ] Events grouped by day
-- [ ] Each event shows: subject, time range, location
-- [ ] Online meeting icon (video) vs in-person icon (people)
-- [ ] CRM contact badges highlighted when email matches a contact
-- [ ] "Log" button navigates to `/activities/new` with pre-filled subject + type=Meeting
+
+- [x] Displays current week range
+- [x] Previous/Today/Next week buttons work
+- [x] Events grouped by day
+- [x] Each event shows: subject, time range, location
+- [x] Online meeting icon (video) vs in-person icon (people)
+- [x] CRM contact badges highlighted when email matches a contact
+- [x] "Log" button navigates to `/activities/new` with pre-filled subject + type=Meeting
 - [ ] Empty week: "No meetings this week."
 - [ ] Error state: "Failed to load calendar..." message
 
 ### Navigation Buttons
-- [ ] "New Opportunity" button navigates to `/opportunities/new`
+
+- [x] "New Opportunity" button navigates to `/opportunities/new`
 
 ### Error Handling
+
 - [ ] Loading spinner shows while fetching
 - [ ] Error state shows error message + "Retry" button
 - [ ] Retry successfully refetches data
@@ -94,72 +105,77 @@
 ## 3. Companies (`w8i`)
 
 ### Company List (`/companies`)
-- [ ] Shows correct count in subtitle ("{N} companies")
-- [ ] DataGrid columns: Name, Code, Industry, Type, Country, Basin, Status
-- [ ] Search by name filters results
-- [ ] Search by code filters results
-- [ ] Industry dropdown filters
-- [ ] Type dropdown filters
-- [ ] Basin dropdown filters
-- [ ] Multiple filters work together
-- [ ] Column sorting works (click headers)
+
+- [x] Shows correct count in subtitle ("{N} companies")
+- [x] DataGrid columns: Name, Code, Industry, Type, Country, Basin, Status
+- [x] Search by name filters results
+- [x] Search by code filters results
+- [x] Industry dropdown filters
+- [x] Type dropdown filters
+- [x] Basin dropdown filters
+- [x] Multiple filters work together
+- [x] Column sorting works (click headers)
 - [ ] Active badge (green) / Inactive badge (red) display correctly
-- [ ] Click row navigates to `/companies/:id`
-- [ ] "New Company" button navigates to `/companies/new`
+- [x] Click row navigates to `/companies/:id`
+- [x] "New Company" button navigates to `/companies/new`
 - [ ] Empty state: "No companies found" + "New Company" link
 
 ### Company Detail (`/companies/:id`)
-- [ ] Header: Company name, code, Active/Inactive badge
-- [ ] General Info: Industry, Type, Country (resolved from lookup ID)
-- [ ] Contact Info: Phone, Website (clickable link), Address
-- [ ] Basin/Regions picker shows selected basins
-- [ ] Add basin via picker creates junction record
+
+- [x] Header: Company name, code, Active/Inactive badge
+- [x] General Info: Industry, Type, Country (resolved from lookup ID)
+- [x] Contact Info: Phone, Website (clickable link), Address
+- [x] Basin/Regions picker shows selected basins
+- [x] Add basin via picker creates junction record
 - [ ] Remove basin via picker deletes junction record
-- [ ] Refresh page: basin changes persist
-- [ ] Parent Company link navigates to parent (if subsidiary)
-- [ ] Subsidiaries list with clickable links
-- [ ] Active Opportunities section: title, ID, product line, revenue, stage badge
+- [x] Refresh page: basin changes persist
+- [x] Parent Company link navigates to parent (if subsidiary)
+- [x] Subsidiaries list with clickable links
+- [x] Active Opportunities section: title, ID, product line, revenue, stage badge
 - [ ] Past Opportunities (collapsible): chevron toggles visibility
-- [ ] Each opportunity link navigates to `/opportunities/:id`
-- [ ] "New Opportunity" button navigates with `?companyId=` param
-- [ ] Contacts section: name, job title, email, DM/Influencer badges
-- [ ] "Add Contact" button navigates with `?companyId=` param
-- [ ] Each contact link navigates to `/contacts/:id`
-- [ ] QuickActions: Log Call, Meeting, Site Visit, Add Note (each pre-fills params)
-- [ ] Activity Timeline loads and displays activities
-- [ ] Timeline "Log Activity" button pre-fills companyId
-- [ ] Each timeline activity navigates to `/activities/:id`
-- [ ] Notes section displays (if present)
-- [ ] "Edit" button navigates to `/companies/:id/edit`
-- [ ] "Deactivate" opens confirmation dialog
-- [ ] Confirm deactivation sets inactive and navigates to `/companies`
+- [x] Each opportunity link navigates to `/opportunities/:id`
+- [x] "New Opportunity" button navigates with `?companyId=` param
+- [x] Contacts section: name, job title, email, DM/Influencer badges
+- [x] "Add Contact" button navigates with `?companyId=` param
+- [x] Each contact link navigates to `/contacts/:id`
+- [x] QuickActions: Log Call, Meeting, Site Visit, Add Note (each pre-fills params)
+- [x] Activity Timeline loads and displays activities
+- [x] Timeline "Log Activity" button pre-fills companyId
+- [x] Each timeline activity navigates to `/activities/:id`
+- [x] Notes section displays (if present)
+- [x] "Edit" button navigates to `/companies/:id/edit`
+- [x] "Deactivate" opens confirmation dialog
+- [x] Confirm deactivation sets inactive and navigates to `/companies`
 
 ### Company Form (`/companies/new`)
-- [ ] Title: "New Company"
-- [ ] Company Name field (required, shows error if blank on submit)
-- [ ] Company Code field (required, auto-uppercases, max 6 chars)
-- [ ] Industry dropdown (clearable)
-- [ ] Company Type dropdown (clearable)
-- [ ] Country combobox (searchable, clearable)
-- [ ] "Is Subsidiary" switch
-- [ ] Parent Company combobox appears when subsidiary checked
-- [ ] Website, Phone, Address fields
-- [ ] Notes textarea
-- [ ] Submit with valid data: saves and navigates to detail page
-- [ ] Cancel navigates back to `/companies`
-- [ ] "Saving..." button state during submission
+
+- [x] Title: "New Company"
+- [x] Company Name field (required, shows error if blank on submit)
+- [x] Company Code field (required, auto-uppercases, max 6 chars)
+- [x] Industry dropdown (clearable)
+- [x] Company Type dropdown (clearable)
+- [x] Country combobox (searchable, clearable)
+- [x] "Is Subsidiary" switch
+- [x] Parent Company combobox appears when subsidiary checked
+- [x] Website, Phone, Address fields
+- [x] Notes textarea
+- [x] Submit with valid data: saves and navigates to detail page
+- [x] Cancel navigates back to `/companies`
+- [x] "Saving..." button state during submission
 
 ### Company Form (`/companies/:id/edit`)
-- [ ] Title: "Edit Company"
-- [ ] All fields pre-populated with existing data
-- [ ] Update saves changes and navigates to detail
-- [ ] Cancel navigates back to `/companies/:id`
+
+- [x] Title: "Edit Company"
+- [x] All fields pre-populated with existing data
+- [x] Update saves changes and navigates to detail
+- [x] Cancel navigates back to `/companies/:id`
 
 ---
 
 ## 4. Contacts (`zpc`)
 
 ### Contact List (`/contacts`)
+
 - [ ] Shows correct count ("{N} contacts")
 - [ ] DataGrid columns: Full Name, Email, Phone, Company, Job Title, DM, Status
 - [ ] Search by name filters results
@@ -171,6 +187,7 @@
 - [ ] Empty state with "New Contact" link
 
 ### Contact Detail (`/contacts/:id`)
+
 - [ ] Header: Contact name, Company name subtitle, Active/Inactive badge
 - [ ] Contact Info: Email, Phone, Mobile
 - [ ] Role: Job Title, Department, Preferred Name
@@ -183,6 +200,7 @@
 - [ ] "Deactivate" opens confirm dialog, deactivates on confirm
 
 ### Email Panel (on Contact Detail)
+
 - [ ] Shows "No email address on file" if contact has no email
 - [ ] Loads emails from Graph API when contact has email
 - [ ] Email rows show: sender, subject, preview, date
@@ -193,6 +211,7 @@
 - [ ] Error state: "Failed to load emails..." message
 
 ### Compose Email
+
 - [ ] "Compose" button opens ComposeDialog
 - [ ] "To" field pre-filled and disabled
 - [ ] Subject field (required)
@@ -203,6 +222,7 @@
 - [ ] Send error: error banner in dialog
 
 ### Contact Form (`/contacts/new`)
+
 - [ ] Full Name (required)
 - [ ] Email (email validation)
 - [ ] Phone, Mobile, Preferred Name, Job Title
@@ -215,6 +235,7 @@
 - [ ] Cancel navigates to `/contacts`
 
 ### Contact Form (`/contacts/:id/edit`)
+
 - [ ] All fields pre-populated
 - [ ] Update saves and navigates to detail
 - [ ] Cancel navigates to `/contacts/:id`
@@ -224,6 +245,7 @@
 ## 5. Opportunities (`zdw`)
 
 ### Opportunity List (`/opportunities`)
+
 - [ ] Shows correct count
 - [ ] DataGrid: Opportunity ID, Name, Company, Stage (colored badge), Revenue, Product Line, Close Date
 - [ ] Search by ID or name filters
@@ -235,6 +257,7 @@
 - [ ] "New Opportunity" button navigates to `/opportunities/new`
 
 ### Opportunity Detail (`/opportunities/:id`)
+
 - [ ] Header: Opportunity name, ID (monospace), Stage badge
 - [ ] Stage dropdown in header changes stage on selection (mutation)
 - [ ] Deal Info: Revenue, Probability (%), Product Line, PO Number, Tax Exempt
@@ -248,6 +271,7 @@
 - [ ] "Edit" navigates to edit form
 
 ### Opportunity Form (`/opportunities/new`)
+
 - [ ] Name (required), Company combobox (required)
 - [ ] Primary Contact dropdown: disabled until company selected, filtered by company
 - [ ] Company change resets Primary Contact
@@ -262,6 +286,7 @@
 - [ ] Cancel navigates to `/opportunities`
 
 ### Opportunity Form (`/opportunities/:id/edit`)
+
 - [ ] Opportunity ID displayed (read-only)
 - [ ] All fields pre-populated
 - [ ] Update saves and navigates to detail
@@ -271,6 +296,7 @@
 ## 6. Pipeline (`edg`)
 
 ### Pipeline Board (`/pipeline`)
+
 - [ ] 8 stage columns render: Lead through After Action
 - [ ] Each column header: Stage badge, count, total revenue
 - [ ] Opportunity cards show: ID, Title, Company, Revenue, Product Line
@@ -282,6 +308,7 @@
 - [ ] Click card navigates to `/opportunities/:id`
 
 ### Drag-and-Drop
+
 - [ ] Drag card from one column to another
 - [ ] Drop updates opportunity stage via mutation
 - [ ] Card appears in new column
@@ -293,6 +320,7 @@
 ## 7. Activities (`0iv`)
 
 ### Activity List (`/activities`)
+
 - [ ] Shows correct count
 - [ ] DataGrid: Date, Subject, Type (colored badge), Company, Contact, Owner, Direction
 - [ ] Search by subject filters
@@ -302,6 +330,7 @@
 - [ ] "Log Activity" navigates to `/activities/new`
 
 ### Activity Detail (`/activities/:id`)
+
 - [ ] Header: Subject, formatted date
 - [ ] Badges: Type (colored), Direction, "Auto" (if auto-created)
 - [ ] Details: Owner, Duration (if present), Source, Created, Modified
@@ -312,6 +341,7 @@
 - [ ] Confirm delete removes activity, navigates to `/activities`
 
 ### Activity Form (`/activities/new`)
+
 - [ ] Subject (required), Type dropdown (required, default "Call")
 - [ ] Date (required, default now), Direction dropdown
 - [ ] Duration field: shown only for Call/Meeting types
@@ -323,6 +353,7 @@
 - [ ] Description textarea
 
 ### URL Param Pre-fill
+
 - [ ] `?type=Call` pre-selects type
 - [ ] `?type=Meeting` pre-selects type + shows Duration field
 - [ ] `?companyId=X` pre-selects company
@@ -332,6 +363,7 @@
 - [ ] Multiple params combined (e.g., from QuickActions)
 
 ### Form Actions
+
 - [ ] Submit saves and navigates to detail
 - [ ] Cancel navigates to `/activities`
 - [ ] Edit mode: all fields pre-populated, save updates
@@ -341,6 +373,7 @@
 ## 8. Basin/Regions (`p6x`)
 
 ### Basin/Region List (`/basin-regions`)
+
 - [ ] Shows correct count
 - [ ] DataGrid: Basin/Region, Code, Description, Status
 - [ ] Search by name or code filters
@@ -349,6 +382,7 @@
 - [ ] "New Basin/Region" navigates to `/basin-regions/new`
 
 ### Basin/Region Detail (`/basin-regions/:id`)
+
 - [ ] Header: Name, Code, Active/Inactive badge
 - [ ] Basin info: Name, Code, Description
 - [ ] CountryPicker: multi-select dropdown showing selected countries
@@ -359,6 +393,7 @@
 - [ ] "Deactivate" opens confirm dialog, deactivates on confirm
 
 ### Basin/Region Form (`/basin-regions/new`)
+
 - [ ] Name (required), Code (required, auto-uppercase, max 6)
 - [ ] Description textarea
 - [ ] Info message: "Countries can be added from detail page after creation"
@@ -366,6 +401,7 @@
 - [ ] Cancel navigates to `/basin-regions`
 
 ### Basin/Region Form (`/basin-regions/:id/edit`)
+
 - [ ] All fields pre-populated
 - [ ] Update saves, navigates to detail
 
@@ -374,17 +410,20 @@
 ## 9. Settings & Email Monitoring (`s5e`)
 
 ### Settings Page Display
+
 - [ ] Account card shows "Signed in as {user name}"
 - [ ] Email Monitoring card renders
 - [ ] Info text explains feature (privacy note about email content not stored)
 
 ### Status Check
+
 - [ ] Loading: spinner next to switch
 - [ ] Active: "Active" badge (green), switch ON, expiration date shown
 - [ ] Off: "Off" badge (gray), switch OFF, no expiration shown
 - [ ] Error: red MessageBar "Unable to check monitoring status..."
 
 ### Enable Monitoring
+
 - [ ] Click switch (OFF state) opens Enable dialog
 - [ ] Dialog title: "Enable Email Monitoring?"
 - [ ] Dialog explains: only CRM contacts tracked, body not stored, can disable anytime
@@ -395,6 +434,7 @@
 - [ ] Error: dialog closes, error MessageBar shown, switch stays OFF
 
 ### Disable Monitoring
+
 - [ ] Click switch (ON state) opens Disable dialog
 - [ ] Dialog warns about stopping auto-logging
 - [ ] Cancel closes dialog, switch stays ON
@@ -404,6 +444,7 @@
 - [ ] 404 (no subscription found) treated as success (switch goes OFF)
 
 ### Daemon API Integration
+
 - [ ] `GET /api/subscriptions/status/{userId}` returns correct monitoring state
 - [ ] `POST /api/subscriptions` with user's Entra GUID creates subscription
 - [ ] `DELETE /api/subscriptions/user/{userId}` removes subscription
@@ -414,6 +455,7 @@
 ## 10. Edge Cases & Error Handling (`12n`)
 
 ### Empty States
+
 - [ ] No companies: empty state with "New Company" link
 - [ ] No contacts: empty state with "New Contact" link
 - [ ] No opportunities: empty state with "New Opportunity" link
@@ -424,6 +466,7 @@
 - [ ] No linked records on activity detail: "No linked records" text
 
 ### Form Validation
+
 - [ ] Submit without required fields shows inline errors
 - [ ] Fill required field clears its error
 - [ ] Company Code auto-uppercases and enforces max length 6
@@ -433,6 +476,7 @@
 - [ ] Cancel doesn't save partial data
 
 ### Error Handling
+
 - [ ] Network error on list page: error message + "Retry" button
 - [ ] Network error on detail page: error message + "Retry"
 - [ ] Network error on form submit: error banner, form stays editable
@@ -440,6 +484,7 @@
 - [ ] Retry button successfully refetches data
 
 ### Lookup Resolution
+
 - [ ] Company names resolve from lookup IDs on opportunity/contact/activity
 - [ ] Contact names resolve from lookup IDs on activity
 - [ ] Country names resolve from lookup IDs on company
@@ -447,6 +492,7 @@
 - [ ] Orphaned lookups (deleted parent) handled gracefully (show ID or "Unknown")
 
 ### Data Integrity
+
 - [ ] Create company then create contact linked to it: lookup resolves
 - [ ] Create opportunity with company + contact: both lookups resolve
 - [ ] Deactivate company: company still shows in existing opportunities
@@ -454,6 +500,7 @@
 - [ ] Activity auto-creation (email send): creates with correct links
 
 ### Concurrent Operations
+
 - [ ] Rapid filter changes don't cause stale data display
 - [ ] Multiple quick navigation doesn't cause render errors
 - [ ] Generate ID under concurrent load returns unique IDs
@@ -463,6 +510,7 @@
 ## Integration Test Scenarios
 
 ### Scenario A: Full CRM Workflow
+
 1. Create new company (Name: "E2E Test Corp", Code: "E2ET")
 2. Add basin "Permian" to company via picker
 3. Create contact linked to company (Email: known test email)
@@ -475,6 +523,7 @@
 10. Verify stage change reflects on opportunity detail
 
 ### Scenario B: Email Integration
+
 1. Navigate to Settings, enable email monitoring
 2. Verify subscription created (Active badge, expiration shown)
 3. Send test email to/from a CRM contact
@@ -488,6 +537,7 @@
 11. Verify subscription removed (Off badge)
 
 ### Scenario C: Calendar to Activity
+
 1. Ensure test calendar has a meeting with a CRM contact attendee
 2. Navigate to Dashboard
 3. Calendar widget shows the meeting
@@ -502,9 +552,11 @@
 ## API Endpoint Tests
 
 ### SWA API — `/api/health`
+
 - [ ] GET returns 200 with `{ status: "ok" }`
 
 ### SWA API — `/api/generate-id`
+
 - [ ] POST with `{ entityType, companyCode }` returns generated ID
 - [ ] Sequential calls return incrementing counter
 - [ ] Different company codes get independent counters
@@ -512,22 +564,27 @@
 - [ ] Missing entityType or companyCode returns 400
 
 ### Daemon API — `/api/health`
+
 - [ ] GET returns 200 with `{ status: "ok", service: "tss-daemon-func" }`
 
 ### Daemon API — `/api/subscriptions`
+
 - [ ] POST with userId creates subscription (201)
 - [ ] GET lists all active subscriptions (200)
 - [ ] Missing userId returns 400
 
 ### Daemon API — `/api/subscriptions/status/{userId}`
+
 - [ ] Returns `{ monitoring: true, subscriptionId, expirationDateTime }` when active
 - [ ] Returns `{ monitoring: false }` when no subscription
 
 ### Daemon API — `/api/subscriptions/user/{userId}`
+
 - [ ] DELETE removes user's subscription (204)
 - [ ] Returns 404 if no subscription exists
 
 ### Daemon API — `/api/email-webhook`
+
 - [ ] Validation handshake: echoes `validationToken` as text/plain
 - [ ] Valid notification with CRM contact match creates activity
 - [ ] Valid notification with no match skips silently
@@ -535,6 +592,7 @@
 - [ ] Invalid clientState rejects notification
 
 ### Daemon API — Renewal Timer
+
 - [ ] Subscriptions nearing expiration (<24h) are renewed
 - [ ] Expired subscriptions are recreated
 - [ ] Healthy subscriptions are left untouched

@@ -8,11 +8,13 @@ import {
   DataGridBody,
   DataGridCell,
   Badge,
+  Button,
   Dropdown,
   Option,
   type TableColumnDefinition,
   createTableColumn,
 } from '@fluentui/react-components';
+import { FilterDismiss24Regular } from '@fluentui/react-icons';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { LoadingState } from '@/components/shared/LoadingState';
@@ -90,16 +92,19 @@ export function CompanyList() {
     }),
     createTableColumn<Company>({
       columnId: 'country',
+      compare: (a, b) => getCountryName(a).localeCompare(getCountryName(b)),
       renderHeaderCell: () => 'Country',
       renderCell: (item) => getCountryName(item),
     }),
     createTableColumn<Company>({
       columnId: 'basin',
+      compare: (a, b) => (a.tss_basin ?? '').localeCompare(b.tss_basin ?? ''),
       renderHeaderCell: () => 'Basin',
       renderCell: (item) => item.tss_basin ?? '—',
     }),
     createTableColumn<Company>({
       columnId: 'active',
+      compare: (a, b) => Number(b.tss_isActive) - Number(a.tss_isActive),
       renderHeaderCell: () => 'Status',
       renderCell: (item) => (
         <Badge
@@ -111,6 +116,15 @@ export function CompanyList() {
       ),
     }),
   ], [countryMap]);
+
+  const hasFilters = search || industry || companyType || basin;
+
+  const resetFilters = () => {
+    setSearch('');
+    setIndustry('');
+    setCompanyType('');
+    setBasin('');
+  };
 
   if (isLoading) return <LoadingState message="Loading companies..." />;
   if (error) return <ErrorState message={error.message} onRetry={() => refetch()} />;
@@ -133,7 +147,8 @@ export function CompanyList() {
         />
         <Dropdown
           placeholder="Industry"
-          value={industry}
+          selectedOptions={industry ? [industry] : []}
+          value={industry || ''}
           onOptionSelect={(_, data) => setIndustry(data.optionValue ?? '')}
           clearable
           className="w-44"
@@ -144,7 +159,8 @@ export function CompanyList() {
         </Dropdown>
         <Dropdown
           placeholder="Type"
-          value={companyType}
+          selectedOptions={companyType ? [companyType] : []}
+          value={companyType || ''}
           onOptionSelect={(_, data) => setCompanyType(data.optionValue ?? '')}
           clearable
           className="w-44"
@@ -155,7 +171,8 @@ export function CompanyList() {
         </Dropdown>
         <Dropdown
           placeholder="Basin"
-          value={basin}
+          selectedOptions={basin ? [basin] : []}
+          value={basin || ''}
           onOptionSelect={(_, data) => setBasin(data.optionValue ?? '')}
           clearable
           className="w-44"
@@ -164,6 +181,16 @@ export function CompanyList() {
             <Option key={b.id} value={b.Title}>{b.Title}</Option>
           ))}
         </Dropdown>
+        {hasFilters && (
+          <Button
+            appearance="subtle"
+            icon={<FilterDismiss24Regular />}
+            onClick={resetFilters}
+            size="small"
+          >
+            Reset Filters
+          </Button>
+        )}
       </div>
 
       {/* Data Grid */}

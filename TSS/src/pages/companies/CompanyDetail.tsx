@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button, Badge } from '@fluentui/react-components';
-import { Edit24Regular, Delete24Regular, ChevronDown24Regular, ChevronRight24Regular } from '@fluentui/react-icons';
+import { Edit24Regular, Delete24Regular, ChevronDown24Regular, ChevronRight24Regular, Add16Regular } from '@fluentui/react-icons';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
@@ -201,8 +201,9 @@ export function CompanyDetail() {
             Active Opportunities ({activeOpps.length})
           </h3>
           <Button
-            appearance="subtle"
+            appearance="outline"
             size="small"
+            icon={<Add16Regular />}
             onClick={() => navigate(`/opportunities/new?companyId=${companyId}`)}
           >
             New Opportunity
@@ -292,8 +293,9 @@ export function CompanyDetail() {
             Contacts ({contacts?.length ?? 0})
           </h3>
           <Button
-            appearance="subtle"
+            appearance="outline"
             size="small"
+            icon={<Add16Regular />}
             onClick={() => navigate(`/contacts/new?companyId=${companyId}`)}
           >
             Add Contact

@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Combobox, Option, Badge, Button } from '@fluentui/react-components';
-import { Dismiss12Regular } from '@fluentui/react-icons';
+import { Combobox, Option, InteractionTag, InteractionTagPrimary, TagGroup } from '@fluentui/react-components';
 import { useBasinRegions } from '@/hooks/useBasinRegions';
 import type { BasinRegion } from '@/types';
 
@@ -47,35 +46,32 @@ export function BasinPicker({ selectedIds, onChange, disabled }: BasinPickerProp
 
   return (
     <div className="space-y-2">
-      {/* Selected basins as chips */}
+      {/* Selected basins as dismissible tags */}
       {selectedIds.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {selectedIds.map((id) => {
-            const basin = basinMap.get(id);
-            return (
-              <Badge
-                key={id}
-                appearance="outline"
-                color="informative"
-                size="medium"
-                className="pr-1"
-              >
-                <span className="flex items-center gap-1">
-                  {basin?.Title ?? `Basin #${id}`}
-                  {!disabled && (
-                    <Button
-                      appearance="transparent"
-                      size="small"
-                      icon={<Dismiss12Regular />}
-                      onClick={() => handleRemove(id)}
-                      className="!min-w-0 !p-0"
-                    />
-                  )}
-                </span>
-              </Badge>
-            );
-          })}
-        </div>
+        <TagGroup
+          onDismiss={(_e, data) => {
+            if (!disabled) handleRemove(Number(data.value));
+          }}
+        >
+          <div className="flex flex-wrap gap-1.5">
+            {selectedIds.map((id) => {
+              const basin = basinMap.get(id);
+              return (
+                <InteractionTag
+                  key={id}
+                  appearance="outline"
+                  shape="circular"
+                  size="small"
+                  value={String(id)}
+                >
+                  <InteractionTagPrimary hasSecondaryAction={!disabled}>
+                    {basin?.Title ?? `Basin #${id}`}
+                  </InteractionTagPrimary>
+                </InteractionTag>
+              );
+            })}
+          </div>
+        </TagGroup>
       )}
 
       {/* Combobox to add more */}

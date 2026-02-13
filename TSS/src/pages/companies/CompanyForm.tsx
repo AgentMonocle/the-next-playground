@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -35,6 +35,8 @@ export function CompanyForm() {
     tss_isSubsidiary: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [countryQuery, setCountryQuery] = useState('');
+  const [parentQuery, setParentQuery] = useState('');
 
   useEffect(() => {
     if (isEdit && existingCompany) {
@@ -90,9 +92,23 @@ export function CompanyForm() {
     }
   };
 
-  if (isEdit && loadingCompany) return <LoadingState message="Loading company..." />;
+  const filteredCountries = useMemo(() => {
+    if (!countries) return [];
+    if (!countryQuery) return countries;
+    const q = countryQuery.toLowerCase();
+    return countries.filter((c) => c.Title.toLowerCase().includes(q));
+  }, [countries, countryQuery]);
 
-  const parentOptions = allCompanies?.filter((c) => c.id !== companyId) ?? [];
+  const parentOptions = useMemo(() => {
+    const opts = allCompanies?.filter((c) => c.id !== companyId) ?? [];
+    if (!parentQuery) return opts;
+    const q = parentQuery.toLowerCase();
+    return opts.filter((c) =>
+      c.Title.toLowerCase().includes(q) || c.tss_companyCode.toLowerCase().includes(q)
+    );
+  }, [allCompanies, companyId, parentQuery]);
+
+  if (isEdit && loadingCompany) return <LoadingState message="Loading company..." />;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -157,15 +173,21 @@ export function CompanyForm() {
 
         <FormField label="Country" error={errors.tss_countryId}>
           <Combobox
-            value={countries?.find((c) => c.id === form.tss_countryId)?.Title ?? ''}
+            value={countryQuery || (countries?.find((c) => c.id === form.tss_countryId)?.Title ?? '')}
+            onChange={(e) => setCountryQuery((e.target as HTMLInputElement).value)}
             onOptionSelect={(_, data) => {
               const countryId = data.optionValue ? Number(data.optionValue) : undefined;
               updateField('tss_countryId', countryId);
+              setCountryQuery('');
             }}
             freeform={false}
             clearable
+            onOpenChange={(_, data) => {
+              if (!data.open) setCountryQuery('');
+            }}
+            input={{ autoComplete: 'off', 'data-lpignore': 'true', 'data-form-type': 'other' } as React.InputHTMLAttributes<HTMLInputElement>}
           >
-            {(countries ?? []).map((c) => (
+            {filteredCountries.map((c) => (
               <Option key={c.id} value={String(c.id)}>{c.Title}</Option>
             ))}
           </Combobox>
@@ -180,13 +202,19 @@ export function CompanyForm() {
         {form.tss_isSubsidiary && (
           <FormField label="Parent Company" error={errors.tss_parentCompanyId}>
             <Combobox
-              value={parentOptions.find((c) => c.id === form.tss_parentCompanyId)?.Title ?? ''}
+              value={parentQuery || ((allCompanies ?? []).find((c) => c.id === form.tss_parentCompanyId)?.Title ?? '')}
+              onChange={(e) => setParentQuery((e.target as HTMLInputElement).value)}
               onOptionSelect={(_, data) => {
                 const parentId = data.optionValue ? Number(data.optionValue) : undefined;
                 updateField('tss_parentCompanyId', parentId);
+                setParentQuery('');
               }}
               freeform={false}
               clearable
+              onOpenChange={(_, data) => {
+                if (!data.open) setParentQuery('');
+              }}
+              input={{ autoComplete: 'off', 'data-lpignore': 'true', 'data-form-type': 'other' } as React.InputHTMLAttributes<HTMLInputElement>}
             >
               {parentOptions.map((c) => (
                 <Option key={c.id} value={String(c.id)} text={`${c.Title} (${c.tss_companyCode})`}>{`${c.Title} (${c.tss_companyCode})`}</Option>
