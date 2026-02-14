@@ -127,6 +127,31 @@ For each development stage:
 9. **Teardown**: Remove worktrees and delete agent branches
 10. `bd sync` → `git push`
 
+## Ops Monitor
+
+The `ops-monitor` agent runs read-only health checks and returns a structured report. Spawn it for:
+
+- **Session preflight** — quick sanity check before starting work
+- **Pre-push validation** — verify TypeScript, tests, and build pass before pushing
+- **On-demand diagnostics** — when something seems broken
+
+**How to spawn:**
+
+```
+Task tool:
+  subagent_type: "ops-monitor"
+  model: sonnet
+  prompt: "Run a full health check on the TSS project. Working directory: C:/GitHub/the-next-playground"
+```
+
+To include SWA URL (if known):
+
+```
+  prompt: "Run a full health check on the TSS project. Working directory: C:/GitHub/the-next-playground. SWA_URL=https://<your-swa-url>.azurestaticapps.net"
+```
+
+The agent returns a markdown table with PASS/WARN/FAIL/SKIP status for each check. Review the "Issues Found" section for actionable items.
+
 ## Key Technical Notes
 
 - SharePoint boolean OData filters DON'T WORK — use client-side filtering
