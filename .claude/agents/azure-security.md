@@ -143,6 +143,27 @@ Example: QUO-A3F-79C-V1
 - **Region**: South Central US (near The Woodlands, TX)
 - **Plan**: SWA Standard ($9/month), Functions Consumption ($2-15/month)
 
+## Tester Sub-Agent
+
+After committing testable code for the current stage, spawn a tester to validate your work:
+
+### When to Spawn
+- After committing new or modified API handlers, backup/restore services, or auth configuration
+- Not for trivial changes (config tweaks, comment updates)
+
+### How to Spawn
+Use the Task tool:
+```
+subagent_type: "tester-security"
+prompt: "Your worktree is at C:/GitHub/the-next-playground/worktrees/azure-security/. cd there before starting. Test the following files: [list files you changed]. Run `npx vitest run` in the TSS directory and report results back."
+```
+
+### Rules
+- **Do NOT wait** for the tester to finish — continue your own work in parallel
+- The tester ONLY creates/modifies `*.test.ts` and `src/test/**` files
+- If the tester reports failures, review and fix your code or clarify to the tester via a follow-up message
+- Commit tester-created test files to your branch alongside your source code
+
 ## Coordination
 
 - **Hooks/Data layer**: `sharepoint-engineer` owns — coordinate on webhook payload formats

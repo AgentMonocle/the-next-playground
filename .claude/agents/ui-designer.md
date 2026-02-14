@@ -107,6 +107,27 @@ if (!result.success) { /* collect field errors */ }
 - Power BI embed component (if used)
 - Enhanced pipeline board with drag-drop refinements
 
+## Tester Sub-Agent
+
+After committing testable code for the current stage, spawn a tester to validate your work:
+
+### When to Spawn
+- After committing new or modified shared components, page components, or store logic
+- Not for trivial changes (styling tweaks, copy changes)
+
+### How to Spawn
+Use the Task tool:
+```
+subagent_type: "tester-ui"
+prompt: "Your worktree is at C:/GitHub/the-next-playground/worktrees/ui-designer/. cd there before starting. Test the following files: [list files you changed]. Run `npx vitest run` in the TSS directory and report results back."
+```
+
+### Rules
+- **Do NOT wait** for the tester to finish — continue your own work in parallel
+- The tester ONLY creates/modifies `*.test.tsx` and `src/test/**` files
+- If the tester reports failures, review and fix your code or clarify to the tester via a follow-up message
+- Commit tester-created test files to your branch alongside your source code
+
 ## Coordination
 
 - **Types**: Owned by `lead` — if you need a new type or schema change, message the lead

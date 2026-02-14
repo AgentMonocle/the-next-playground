@@ -269,11 +269,11 @@ export function setLookupField(fieldName: string, lookupId: number | undefined):
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
 
-function escapeOData(value: string): string {
+export function escapeOData(value: string): string {
   return value.replace(/'/g, "''");
 }
 
-function extractSkipToken(nextLink: string): string | undefined {
+export function extractSkipToken(nextLink: string): string | undefined {
   try {
     const url = new URL(nextLink);
     return url.searchParams.get('$skipToken') ?? undefined;

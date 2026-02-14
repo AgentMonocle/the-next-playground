@@ -165,6 +165,27 @@ export function useCreateCompany() {
 - **Azure Functions**: `azure-security` owns the API layer — coordinate on webhook payloads
 - **Integrations**: `integrations` agent depends on your hooks for workflow logic
 
+## Tester Sub-Agent
+
+After committing testable code for the current stage, spawn a tester to validate your work:
+
+### When to Spawn
+- After committing new or modified code in `lib/graph/`, `hooks/`, or `types/`
+- Not for trivial changes (typo fixes, comment updates)
+
+### How to Spawn
+Use the Task tool:
+```
+subagent_type: "tester-sharepoint"
+prompt: "Your worktree is at C:/GitHub/the-next-playground/worktrees/sharepoint-engineer/. cd there before starting. Test the following files: [list files you changed]. Run `npx vitest run` in the TSS directory and report results back."
+```
+
+### Rules
+- **Do NOT wait** for the tester to finish — continue your own work in parallel
+- The tester ONLY creates/modifies `*.test.ts(x)` and `src/test/**` files
+- If the tester reports failures, review and fix your code or clarify to the tester via a follow-up message
+- Commit tester-created test files to your branch alongside your source code
+
 ## Naming Conventions
 
 | Item | Pattern | Example |

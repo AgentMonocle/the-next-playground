@@ -65,7 +65,9 @@ After all agents report completion, merge their branches back into `master`.
    git merge --no-ff wt/integrations -m "Merge wt/integrations into master"
    ```
    Only merge agents that were actually spawned. Resolve any conflicts before proceeding to the next merge.
-3. **Run quality gates**: `cd TSS && npx tsc --noEmit && npm run build`
+3. **Run quality gates**: `cd TSS && npx tsc --noEmit && npx vitest run && npm run build`
+   - Tests must pass before push — same standard as type checking
+   - If tests fail after branch merge, it indicates a cross-domain conflict — fix before continuing
 4. **Cleanup** — remove worktrees and branches:
    ```bash
    git worktree remove worktrees/<agent-name>

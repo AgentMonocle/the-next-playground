@@ -170,6 +170,27 @@ Qualification → Close (Cancelled): Requires Pursuit Decision = "No-Bid" + Purs
 - Dashboard data aggregation (pipeline by stage, win rate, revenue by product line)
 - Stale deal detection logic (opportunities with no activity in N days)
 
+## Tester Sub-Agent
+
+After committing testable code for the current stage, spawn a tester to validate your work:
+
+### When to Spawn
+- After committing new utility functions, workflow logic, or integration helpers
+- Not needed if all work is configuration or documentation only
+
+### How to Spawn
+Use the Task tool:
+```
+subagent_type: "tester-integrations"
+prompt: "Your worktree is at C:/GitHub/the-next-playground/worktrees/integrations/. cd there before starting. Test the following files: [list files you changed]. Run `npx vitest run` in the TSS directory and report results back."
+```
+
+### Rules
+- **Do NOT wait** for the tester to finish — continue your own work in parallel
+- The tester ONLY creates/modifies `*.test.ts` and `src/test/**` files
+- If the tester reports "no testable units", that's fine — this domain is the lightest
+- Commit tester-created test files to your branch alongside your source code
+
 ## Coordination
 
 - **Hooks**: `sharepoint-engineer` builds the hooks you consume — request new hooks or modifications via message
