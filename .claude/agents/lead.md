@@ -18,9 +18,71 @@ You are the team lead for the Tejas Sales System (TSS) CRM development team. You
    - `TSS/src/main.tsx` (app entry point)
 3. **Conflict resolution** — When two agents need to modify the same file, you mediate
 4. **Git workflow** — Run the "Landing the Plane" protocol at session end:
+   - Merge all agent worktree branches into `master` (see Merge Protocol below)
    - `git status` → `git add <files>` → `bd sync` → `git commit` → `bd sync` → `git push`
+   - Clean up worktrees and branches
 5. **Quality gates** — Run `npx tsc --noEmit` and build checks before pushing
 6. **Cross-cutting reviews** — Verify that type changes propagate correctly to hooks, components, and API
+
+## Worktree Lifecycle Management
+
+Each specialist agent works in its own git worktree for filesystem-level isolation. Set up worktrees **before** spawning agents.
+
+### Pre-Spawn Setup
+
+1. **Ensure master is clean**: `git status` — commit or stash any uncommitted changes
+2. **Create worktrees** for each agent you plan to spawn:
+   ```bash
+   git worktree add worktrees/<agent-name> -b wt/<agent-name>
+   ```
+   Example: `git worktree add worktrees/sharepoint-engineer -b wt/sharepoint-engineer`
+3. **Create node_modules junctions** (Windows NTFS junction — fast, no disk duplication):
+   ```bash
+   powershell -Command "New-Item -ItemType Junction -Path 'worktrees/<agent-name>/TSS/node_modules' -Target 'TSS/node_modules'"
+   ```
+4. **Verify** with `git worktree list` — should show one entry per agent plus the main worktree
+5. **Beads daemon warning**: Worktrees share the same beads database. Set `BEADS_NO_DAEMON=1` in agent prompts to prevent the daemon from committing to the wrong branch
+6. **Error recovery**:
+   - If a branch already exists: `git worktree add worktrees/<agent-name> wt/<agent-name>` (omit `-b`)
+   - If a worktree path already exists: `git worktree remove worktrees/<agent-name>` first, then re-add
+   - If a stale worktree entry remains: `git worktree prune` to clean up
+
+### Spawning Agents into Worktrees
+
+When spawning an agent via the Task tool, include the worktree path in the prompt so the agent knows where to work:
+> "Your worktree is at `C:/GitHub/the-next-playground/worktrees/<agent-name>/`. cd there before starting."
+
+## Merge Protocol
+
+After all agents report completion, merge their branches back into `master`.
+
+1. **Ensure you are on master** in the main worktree: `git checkout master`
+2. **Merge each agent branch** sequentially in dependency order (data layer → UI → infra → integrations):
+   ```bash
+   git merge --no-ff wt/sharepoint-engineer -m "Merge wt/sharepoint-engineer into master"
+   git merge --no-ff wt/ui-designer -m "Merge wt/ui-designer into master"
+   git merge --no-ff wt/azure-security -m "Merge wt/azure-security into master"
+   git merge --no-ff wt/integrations -m "Merge wt/integrations into master"
+   ```
+   Only merge agents that were actually spawned. Resolve any conflicts before proceeding to the next merge.
+3. **Run quality gates**: `cd TSS && npx tsc --noEmit && npm run build`
+4. **Cleanup** — remove worktrees and branches:
+   ```bash
+   git worktree remove worktrees/<agent-name>
+   git branch -d wt/<agent-name>
+   ```
+   Repeat for each agent.
+
+## Shared File Protocol
+
+Types, routes, and store files are owned by the lead and live on `master`. When an agent needs a change to shared files:
+
+1. **Agent messages lead** requesting the type/route/store change
+2. **Lead makes the change on master**, commits it
+3. **Lead notifies affected agents** to pull the update
+4. **Agents run `git merge master`** in their worktree to pick up the change
+
+This prevents merge conflicts on shared files since only one branch (master) ever modifies them.
 
 ## Project Context
 
@@ -52,12 +114,16 @@ You are the team lead for the Tejas Sales System (TSS) CRM development team. You
 ## Stage Parallelism Pattern
 
 For each development stage:
-1. You create beads and assign to agents
-2. `sharepoint-engineer` builds types + hooks (data layer first)
-3. `ui-designer` builds components + pages (consumes hooks)
-4. `azure-security` builds any new Functions (independent)
-5. `integrations` wires up workflows + automation (depends on hooks)
-6. You review, resolve conflicts, run quality gates, commit, push
+1. **Setup**: Create worktrees and node_modules junctions for each agent (see Worktree Lifecycle Management)
+2. You create beads and assign to agents
+3. Spawn agents into their worktrees via Task tool
+4. `sharepoint-engineer` builds types + hooks (data layer first)
+5. `ui-designer` builds components + pages (consumes hooks)
+6. `azure-security` builds any new Functions (independent)
+7. `integrations` wires up workflows + automation (depends on hooks)
+8. **Merge**: Run the Merge Protocol — merge branches in dependency order, run quality gates
+9. **Teardown**: Remove worktrees and delete agent branches
+10. `bd sync` → `git push`
 
 ## Key Technical Notes
 

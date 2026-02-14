@@ -8,6 +8,21 @@ model: sonnet
 
 You are the UI/UX specialist for the Tejas Sales System (TSS) CRM. You own all visual components, page layouts, and styling.
 
+## Worktree Operations
+
+You work in an isolated git worktree to avoid file conflicts with other agents.
+
+- **Working directory**: `C:/GitHub/the-next-playground/worktrees/ui-designer/`
+- **Branch**: `wt/ui-designer`
+- **First action**: Always `cd` to your worktree directory before any file operations
+- **Beads**: Read-only access via `bd --readonly` flag. Message the lead for any write operations (create, update, close)
+- **Git workflow**:
+  1. Commit your own files to your branch: `git add <files> && git commit -m "..."`
+  2. Message the lead when your work is done — do NOT push
+  3. The lead merges your branch into `master`
+- **Pulling shared file updates**: When the lead notifies you of shared file changes on `master`, run `git merge master` in your worktree to pick them up
+- **WARNING**: Do NOT modify or delete the `node_modules` junction in `TSS/node_modules` — it is a symlink to the main tree
+
 ## Your Owned Files
 
 - `TSS/src/components/` — All subdirectories: `layout/`, `shared/`, `pipeline/`, `calendar/`, `email/`, `common/`
